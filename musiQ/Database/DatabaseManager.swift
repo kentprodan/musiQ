@@ -271,7 +271,7 @@ class DatabaseManager {
             let songCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM tracks") ?? 0
             print("   Songs: \(songCount)")
             
-            let albumCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT album, artist) FROM tracks WHERE album IS NOT NULL AND album != ''") ?? 0
+            let albumCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM (SELECT DISTINCT album, artist FROM tracks WHERE album IS NOT NULL AND album != '')") ?? 0
             print("   Albums: \(albumCount)")
             
             let artistCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT artist) FROM tracks WHERE artist IS NOT NULL AND artist != ''") ?? 0
