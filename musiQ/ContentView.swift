@@ -476,12 +476,12 @@ struct LibraryCheckboxItem: View {
                 
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(isChecked ? .white : .white.opacity(0.4))
                     .frame(width: 18)
                 
                 Text(title)
                     .font(.system(size: 13))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(isChecked ? .white : .white.opacity(0.4))
                 
                 Spacer()
             }
