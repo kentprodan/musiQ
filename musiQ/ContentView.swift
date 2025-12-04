@@ -35,7 +35,8 @@ struct ContentView: View {
                     ZStack(alignment: .bottom) {
                         MainContentView(
                             selectedNavItem: selectedNavItem,
-                            searchText: $searchText
+                            searchText: $searchText,
+                            showSidebar: showSidebar
                         )
                         .frame(width: showSidebar ? max(200, geometry.size.width - sidebarWidth - 1) : geometry.size.width, height: geometry.size.height)
                         
@@ -564,6 +565,7 @@ struct PlaylistItem: View {
 struct MainContentView: View {
     let selectedNavItem: NavigationItem
     @Binding var searchText: String
+    let showSidebar: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -574,7 +576,7 @@ struct MainContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
             case .songs:
-                NewSongsView()
+                NewSongsView(showSidebar: showSidebar)
                     .padding(.bottom, 72)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
@@ -909,6 +911,7 @@ struct TopNavigationBar: View {
 
 // MARK: - New Songs View
 struct NewSongsView: View {
+    let showSidebar: Bool
     @State private var tracks: [TrackRecord] = []
     @State private var isLoading = false
     @State private var searchText = ""
@@ -963,6 +966,7 @@ struct NewSongsView: View {
                 Text("Songs")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(.primary)
+                    .padding(.leading, showSidebar ? 0 : 68)
                 
                 Spacer()
                 
