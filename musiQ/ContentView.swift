@@ -1009,14 +1009,14 @@ struct NewSongsView: View {
                         .textFieldStyle(.plain)
                         .font(.system(size: 13))
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .frame(width: 280)
                 .background(
                     ZStack {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        Capsule()
                             .fill(.ultraThinMaterial)
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        Capsule()
                             .strokeBorder(
                                 LinearGradient(
                                     colors: [
