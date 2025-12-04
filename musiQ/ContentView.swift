@@ -427,17 +427,23 @@ struct SectionHeader: View {
                     Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(isHovered ? .primary : .secondary)
-                        .frame(width: 16, height: 16)
+                        .frame(width: 20, height: 20)
                 }
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
                 .opacity(isHovered ? 1.0 : 0.0)
                 .allowsHitTesting(true)
+                .onHover { hovering in
+                    if hovering {
+                        isHovered = true
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.bottom, 4)
+        .contentShape(Rectangle())
         .onHover { hovering in
             isHovered = hovering
         }
