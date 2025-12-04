@@ -2,6 +2,17 @@
 
 All notable changes to musiQ will be documented in this file.
 
+
+## [0.0.5] - 2025-12-04
+
+### Added
+- Drag and drop support for files and folders in the Inbox sidebar navigation item.
+- Drag and drop support for individual audio files in the Inbox screen (not just folders).
+
+### Changed
+- Updated InboxView and InboxManager to handle both files and folders for import.
+- Updated SidebarItem in ContentView to accept file/folder drops for Inbox.
+
 ## [0.0.4] - 2025-12-04
 
 ### Changed

@@ -4,6 +4,47 @@ import AVFoundation
 
 /// Manages the inbox for pending music imports
 class InboxManager: ObservableObject {
+        // MARK: - Add File to Inbox
+        func addFile(_ sourceURL: URL) {
+            let audioExtensions = ["mp3", "flac", "wav", "aiff", "m4a", "ogg", "opus", "dsd", "dsf", "dff", "ape", "wv"]
+            let fileExtension = sourceURL.pathExtension.lowercased()
+            guard audioExtensions.contains(fileExtension) else {
+                print("❌ Not a supported audio file: \(sourceURL.lastPathComponent)")
+                return
+            }
+
+            // Create inbox item
+            var item = InboxItem(folderURL: sourceURL)
+            item.status = .scanning
+            inboxItems.append(item)
+            saveInboxItems()
+
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                var tracks: [InboxTrack] = []
+                var totalSize: Int64 = 0
+                if let resourceValues = try? sourceURL.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey]),
+                   let isRegularFile = resourceValues.isRegularFile, isRegularFile {
+                    if let track = self?.extractTrackMetadata(from: sourceURL, inboxItemId: item.id) {
+                        tracks.append(track)
+                    }
+                    if let fileSize = resourceValues.fileSize {
+                        totalSize = Int64(fileSize)
+                    }
+                }
+
+                DispatchQueue.main.async {
+                    if let index = self?.inboxItems.firstIndex(where: { $0.id == item.id }) {
+                        self?.inboxItems[index].trackCount = tracks.count
+                        self?.inboxItems[index].totalSize = totalSize
+                        self?.inboxItems[index].status = tracks.count > 0 ? .ready : .failed
+                        self?.saveInboxItems()
+                        self?.inboxTracks.append(contentsOf: tracks)
+                    }
+                }
+            }
+
+            print("📥 Added file to inbox: \(sourceURL.lastPathComponent)")
+        }
     static let shared = InboxManager()
     
     @Published var inboxItems: [InboxItem] = []

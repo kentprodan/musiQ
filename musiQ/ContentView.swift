@@ -516,6 +516,41 @@ struct SidebarItem: View {
         .onHover { hovering in
             isHovered = hovering
         }
+        // Enable drag and drop for Inbox sidebar item
+        .onDrop(of: ["public.file-url"], isTargeted: .constant(false)) { providers in
+            if title == "Inbox" {
+                handleSidebarDrop(providers: providers)
+            }
+            return true
+        }
+    }
+
+    // Sidebar drop handler for Inbox
+    private func handleSidebarDrop(providers: [NSItemProvider]) {
+        for provider in providers {
+            provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (item, error) in
+                guard let data = item as? Data,
+                      let url = URL(dataRepresentation: data, relativeTo: nil) else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    var isDirectory: ObjCBool = false
+                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                        if isDirectory.boolValue {
+                            InboxManager.shared.addFolder(url)
+                        } else {
+                            let audioExtensions = ["mp3", "flac", "wav", "aiff", "m4a", "ogg", "opus", "dsd", "dsf", "dff", "ape", "wv"]
+                            let fileExtension = url.pathExtension.lowercased()
+                            if audioExtensions.contains(fileExtension) {
+                                InboxManager.shared.addFile(url)
+                            } else {
+                                print("❌ Dropped file is not a supported audio format: \(url.lastPathComponent)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

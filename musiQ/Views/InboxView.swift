@@ -208,12 +208,22 @@ struct InboxView: View {
                       let url = URL(dataRepresentation: data, relativeTo: nil) else {
                     return
                 }
-                
+
                 DispatchQueue.main.async {
                     var isDirectory: ObjCBool = false
-                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
-                       isDirectory.boolValue {
-                        inboxManager.addFolder(url)
+                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                        if isDirectory.boolValue {
+                            inboxManager.addFolder(url)
+                        } else {
+                            // Check if file is a supported audio file
+                            let audioExtensions = ["mp3", "flac", "wav", "aiff", "m4a", "ogg", "opus", "dsd", "dsf", "dff", "ape", "wv"]
+                            let fileExtension = url.pathExtension.lowercased()
+                            if audioExtensions.contains(fileExtension) {
+                                inboxManager.addFile(url)
+                            } else {
+                                print("❌ Dropped file is not a supported audio format: \(url.lastPathComponent)")
+                            }
+                        }
                     }
                 }
             }
