@@ -207,6 +207,20 @@ class DatabaseManager {
         }
     }
     
+    func getAllGenres() throws -> [(genre: String, trackCount: Int)] {
+        guard let dbQueue = dbQueue else { return [] }
+        return try dbQueue.read { db in
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT genre, COUNT(*) as count
+                FROM tracks
+                WHERE genre IS NOT NULL AND genre != ''
+                GROUP BY genre
+                ORDER BY genre
+            """)
+            return rows.map { ($0["genre"] as String, $0["count"] as Int) }
+        }
+    }
+    
     // MARK: - Statistics
     func getTotalTrackCount() throws -> Int {
         guard let dbQueue = dbQueue else { return 0 }

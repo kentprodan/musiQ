@@ -83,6 +83,7 @@ enum NavigationItem: String, CaseIterable {
     case artists = "Artists"
     case albums = "Albums"
     case songs = "Songs"
+    case genres = "Genres"
     case playlists = "Playlists"
     
     var icon: String {
@@ -93,6 +94,7 @@ enum NavigationItem: String, CaseIterable {
         case .artists: return "music.mic"
         case .albums: return "square.stack.fill"
         case .songs: return "music.note.list"
+        case .genres: return "guitars.fill"
         case .playlists: return "music.note.list"
         }
     }
@@ -106,6 +108,7 @@ struct LiquidGlassSidebar: View {
     @AppStorage("showArtists") private var showArtists = true
     @AppStorage("showAlbums") private var showAlbums = true
     @AppStorage("showSongs") private var showSongs = true
+    @AppStorage("showGenres") private var showGenres = true
     @State private var showLibrarySettings = false
     
     var body: some View {
@@ -169,6 +172,7 @@ struct LiquidGlassSidebar: View {
                                 LibraryCheckboxItem(icon: "music.mic", title: "Artists", isChecked: $showArtists)
                                 LibraryCheckboxItem(icon: "square.stack.fill", title: "Albums", isChecked: $showAlbums)
                                 LibraryCheckboxItem(icon: "music.note.list", title: "Songs", isChecked: $showSongs)
+                                LibraryCheckboxItem(icon: "guitars.fill", title: "Genres", isChecked: $showGenres)
                             } else {
                                 // Normal mode - show only checked items
                                 if showRecentlyAdded {
@@ -189,6 +193,11 @@ struct LiquidGlassSidebar: View {
                                 if showSongs {
                                     SidebarItem(icon: "music.note.list", title: "Songs", isSelected: selectedItem == .songs) {
                                         selectedItem = .songs
+                                    }
+                                }
+                                if showGenres {
+                                    SidebarItem(icon: "guitars.fill", title: "Genres", isSelected: selectedItem == .genres) {
+                                        selectedItem = .genres
                                     }
                                 }
                             }
@@ -570,6 +579,16 @@ struct MainContentView: View {
                         .background(Color(nsColor: .windowBackgroundColor))
                     Divider()
                     AlbumsView()
+                        .padding(.bottom, 72)
+                }
+                
+            case .genres:
+                VStack(spacing: 0) {
+                    TopNavigationBar(searchText: $searchText, title: "Genres")
+                        .frame(height: 52)
+                        .background(Color(nsColor: .windowBackgroundColor))
+                    Divider()
+                    GenresView()
                         .padding(.bottom, 72)
                 }
                 
@@ -1202,6 +1221,114 @@ struct AlbumCard: View {
                         .font(.system(size: 11))
                         .foregroundStyle(.tertiary)
                 }
+            }
+        }
+        .padding(12)
+        .background(isHovering ? Color.white.opacity(0.05) : Color.clear)
+        .cornerRadius(8)
+        .onHover { hovering in
+            isHovering = hovering
+        }
+    }
+}
+
+// MARK: - Genres View
+struct GenresView: View {
+    @State private var genres: [(genre: String, trackCount: Int)] = []
+    @State private var isLoading = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if isLoading {
+                Spacer()
+                ProgressView("Loading genres...")
+                Spacer()
+            } else if genres.isEmpty {
+                Spacer()
+                VStack(spacing: 12) {
+                    Image(systemName: "guitars.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.secondary)
+                    Text("No genres in library")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: [
+                        GridItem(.adaptive(minimum: 160, maximum: 200), spacing: 20)
+                    ], spacing: 20) {
+                        ForEach(genres, id: \.genre) { genre in
+                            GenreCard(name: genre.genre, trackCount: genre.trackCount)
+                        }
+                    }
+                    .padding(20)
+                }
+            }
+        }
+        .onAppear {
+            loadGenres()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .databaseDidChange)) { _ in
+            loadGenres()
+        }
+    }
+    
+    private func loadGenres() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let loadedGenres = try DatabaseManager.shared.getAllGenres()
+                DispatchQueue.main.async {
+                    self.genres = loadedGenres
+                    self.isLoading = false
+                    print("🎸 Loaded \(loadedGenres.count) genres")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.genres = []
+                    self.isLoading = false
+                    print("❌ Failed to load genres: \(error)")
+                }
+            }
+        }
+    }
+}
+
+struct GenreCard: View {
+    let name: String
+    let trackCount: Int
+    @State private var isHovering = false
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Genre icon/visual
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(
+                        LinearGradient(
+                            colors: [.purple.opacity(0.6), .pink.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 160, height: 160)
+                
+                Image(systemName: "guitars.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+            
+            VStack(spacing: 4) {
+                Text(name)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                
+                Text("\(trackCount) \(trackCount == 1 ? "song" : "songs")")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(12)
