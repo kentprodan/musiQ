@@ -109,6 +109,7 @@ struct LiquidGlassSidebar: View {
     @AppStorage("showAlbums") private var showAlbums = true
     @AppStorage("showSongs") private var showSongs = true
     @AppStorage("showGenres") private var showGenres = true
+    @AppStorage("playlistsCollapsed") private var playlistsCollapsed = false
     @State private var showLibrarySettings = false
     
     var body: some View {
@@ -205,15 +206,26 @@ struct LiquidGlassSidebar: View {
                         .padding(.horizontal, 8)
                         
                         // Playlists Section
-                        SectionHeader(title: "Playlists")
-                            .padding(.top, 16)
-                        
-                        VStack(spacing: 1) {
-                            SidebarItem(icon: "music.note.list", title: "All Playlists", isSelected: selectedItem == .playlists) {
-                                selectedItem = .playlists
+                        SectionHeader(
+                            title: "Playlists",
+                            showCollapseButton: true,
+                            isCollapsed: playlistsCollapsed,
+                            onCollapse: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    playlistsCollapsed.toggle()
+                                }
                             }
+                        )
+                        .padding(.top, 16)
+                        
+                        if !playlistsCollapsed {
+                            VStack(spacing: 1) {
+                                SidebarItem(icon: "music.note.list", title: "All Playlists", isSelected: selectedItem == .playlists) {
+                                    selectedItem = .playlists
+                                }
+                            }
+                            .padding(.horizontal, 8)
                         }
-                        .padding(.horizontal, 8)
                     }
                 }
                 
@@ -382,6 +394,9 @@ struct SectionHeader: View {
     var showEditButton: Bool = false
     var isEditing: Bool = false
     var onEdit: (() -> Void)? = nil
+    var showCollapseButton: Bool = false
+    var isCollapsed: Bool = false
+    var onCollapse: (() -> Void)? = nil
     @State private var isHovered = false
     
     var body: some View {
@@ -403,6 +418,18 @@ struct SectionHeader: View {
                 }
                 .buttonStyle(.plain)
                 .opacity(isEditing || isHovered ? 1.0 : 0.0)
+            }
+            
+            if showCollapseButton {
+                Button(action: {
+                    onCollapse?()
+                }) {
+                    Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(isHovered ? .primary : .secondary)
+                }
+                .buttonStyle(.plain)
+                .opacity(isHovered ? 1.0 : 0.0)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
