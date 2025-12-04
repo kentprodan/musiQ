@@ -404,7 +404,6 @@ struct SectionHeader: View {
             Text(title)
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(.secondary)
-                .textCase(.uppercase)
             
             Spacer()
             
