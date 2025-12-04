@@ -79,7 +79,7 @@ struct ContentView: View {
 enum NavigationItem: String, CaseIterable {
     case home = "Home"
     case inbox = "Inbox"
-    case recentlyAdded = "Recently Added"
+    case recentlyAdded = "Recent"
     case artists = "Artists"
     case albums = "Albums"
     case songs = "Songs"
@@ -170,7 +170,7 @@ struct LiquidGlassSidebar: View {
                         VStack(spacing: 1) {
                             if showLibrarySettings {
                                 // Edit mode - show checkboxes
-                                LibraryCheckboxItem(icon: "clock.fill", title: "Recently Added", isChecked: $showRecentlyAdded)
+                                LibraryCheckboxItem(icon: "clock.fill", title: "Recent", isChecked: $showRecentlyAdded)
                                 LibraryCheckboxItem(icon: "music.mic", title: "Artists", isChecked: $showArtists)
                                 LibraryCheckboxItem(icon: "square.stack.fill", title: "Albums", isChecked: $showAlbums)
                                 LibraryCheckboxItem(icon: "music.note.list", title: "Songs", isChecked: $showSongs)
@@ -178,7 +178,7 @@ struct LiquidGlassSidebar: View {
                             } else {
                                 // Normal mode - show only checked items
                                 if showRecentlyAdded {
-                                    SidebarItem(icon: "clock.fill", title: "Recently Added", isSelected: selectedItem == .recentlyAdded) {
+                                    SidebarItem(icon: "clock.fill", title: "Recent", isSelected: selectedItem == .recentlyAdded) {
                                         selectedItem = .recentlyAdded
                                     }
                                 }
