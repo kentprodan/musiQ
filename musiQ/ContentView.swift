@@ -581,6 +581,7 @@ struct MainContentView: View {
                 
             case .songs:
                 NewSongsView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.bottom, 72)
                 
             case .recentlyAdded:
@@ -1018,6 +1019,7 @@ struct NewSongsView: View {
                     ProgressView("Loading tracks...")
                     Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if filteredTracks.isEmpty {
                 VStack(spacing: 12) {
                     Spacer()
@@ -1029,6 +1031,7 @@ struct NewSongsView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 Table(filteredTracks) {
                     TableColumn("Title") { track in
