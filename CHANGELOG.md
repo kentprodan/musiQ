@@ -2,7 +2,7 @@
 
 All notable changes to musiQ will be documented in this file.
 
-## [0.3.0] - 2025-12-04
+## [0.0.2] - 2025-12-04
 
 ### Added - Library Customization & Organization
 - **Genres View**: Browse music by genre
@@ -29,12 +29,64 @@ All notable changes to musiQ will be documented in this file.
 - SectionHeader component enhanced with edit and collapse functionality
 - Playlists section can be collapsed to save sidebar space
 
+### Changed - Sidebar UI/UX Refinements
+- Sidebar navigation items now use white text/icons with orange for selected state
+- Section headers (Library, Playlists) reduced to 10pt font size with sentence case
+- "Recently Added" renamed to "Recent" for brevity
+- Edit mode checkboxes match regular sidebar item dimensions and spacing
+- Unchecked items in edit mode appear greyed out (40% opacity)
+- Edit and collapse buttons stay visible when hovering over them
+- Orange accent color for selected items and checked states
+
+### Fixed
+- Library Edit button now properly interactive with correct hover behavior
+- Playlists collapse button stays visible and clickable during hover
+- Section header buttons maintain visibility when cursor moves to them
+
 ### Technical
 - Added `getAllGenres()` to DatabaseManager with SQL GROUP BY
 - LibraryCheckboxItem component for inline editing
 - Enhanced SectionHeader with dual button support (edit + collapse)
 - @AppStorage for showRecentlyAdded, showArtists, showAlbums, showSongs, showGenres, playlistsCollapsed
 - GenresView follows same pattern as ArtistsView/AlbumsView with grid layout
+- Button hover handlers keep state active for interactive elements
+- Consistent 10px horizontal, 6px vertical padding across all sidebar items
+
+## [0.0.1] - 2025-12-04
+
+### Added - Initial Release
+- musiQ - A modern, high-fidelity music player for macOS
+- Modern macOS design with liquid glass UI
+- Support for high-quality audio formats (FLAC, DSD, Opus, etc.)
+- BASS audio engine for professional playback
+- Complete library management system
+- Inbox system for organizing music imports
+- Database-driven library with GRDB.swift
+- Comprehensive settings and initial setup flow
+
+### Core Components
+- Audio Engine: BASS-powered playback with real-time controls
+- Database Manager: SQLite-based music library
+- Library Importer: Batch metadata extraction and import
+- Inbox Manager: Temporary storage for new music
+- Settings Manager: User preferences and library configuration
+
+### Library Views
+- Songs: Complete track listing with metadata
+- Recently Added: Chronological import history
+- Artists: Grid view of all artists with track counts
+- Albums: Grid view of all albums with artwork placeholders
+- Inbox: Drag-and-drop music import workflow
+
+### UI Features
+- Resizable liquid glass sidebar
+- Top navigation bar with search
+- Bottom playback control bar
+- Real-time progress tracking
+- Volume control with slider
+- Play/pause, skip controls
+
+## [Archived Versions]
 
 ## [0.2.0] - 2025-12-04
 
