@@ -2,6 +2,11 @@
 
 All notable changes to musiQ will be documented in this file.
 
+## [0.0.4] - 2025-12-04
+
+### Changed
+- Updated CHANGELOG.md to version 0.0.4
+
 ## [0.0.3] - 2025-12-04
 
 ### Added - Home Dashboard
