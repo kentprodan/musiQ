@@ -141,12 +141,6 @@ struct LiquidGlassSidebar: View {
                 // Content area
                 ScrollView {
                     VStack(spacing: 0) {
-                        // Search
-                        SearchField()
-                            .padding(.horizontal, 12)
-                            .padding(.top, 4)
-                            .padding(.bottom, 12)
-            
                         // Main Navigation
                         VStack(spacing: 1) {
                             SidebarItem(icon: "house.fill", title: "Home", isSelected: selectedItem == .home) {
@@ -636,14 +630,8 @@ struct MainContentView: View {
                 }
                 
             case .home:
-                VStack(spacing: 0) {
-                    TopNavigationBar(searchText: $searchText, title: "Home")
-                        .frame(height: 52)
-                        .background(Color(nsColor: .windowBackgroundColor))
-                    Divider()
-                    HomeView()
-                        .padding(.bottom, 72)
-                }
+                HomeView()
+                    .padding(.bottom, 72)
                 
             case .playlists:
                 VStack(spacing: 0) {
