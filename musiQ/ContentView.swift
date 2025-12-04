@@ -102,6 +102,11 @@ enum NavigationItem: String, CaseIterable {
 struct LiquidGlassSidebar: View {
     @Binding var selectedItem: NavigationItem
     @Binding var showSidebar: Bool
+    @AppStorage("showRecentlyAdded") private var showRecentlyAdded = true
+    @AppStorage("showArtists") private var showArtists = true
+    @AppStorage("showAlbums") private var showAlbums = true
+    @AppStorage("showSongs") private var showSongs = true
+    @State private var showLibrarySettings = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -150,21 +155,31 @@ struct LiquidGlassSidebar: View {
                         .padding(.horizontal, 8)
                         
                         // Library Section
-                        SectionHeader(title: "Library")
-                            .padding(.top, 16)
+                        SectionHeader(title: "Library", showEditButton: true) {
+                            showLibrarySettings = true
+                        }
+                        .padding(.top, 16)
                         
                         VStack(spacing: 1) {
-                            SidebarItem(icon: "clock.fill", title: "Recently Added", isSelected: selectedItem == .recentlyAdded) {
-                                selectedItem = .recentlyAdded
+                            if showRecentlyAdded {
+                                SidebarItem(icon: "clock.fill", title: "Recently Added", isSelected: selectedItem == .recentlyAdded) {
+                                    selectedItem = .recentlyAdded
+                                }
                             }
-                            SidebarItem(icon: "music.mic", title: "Artists", isSelected: selectedItem == .artists) {
-                                selectedItem = .artists
+                            if showArtists {
+                                SidebarItem(icon: "music.mic", title: "Artists", isSelected: selectedItem == .artists) {
+                                    selectedItem = .artists
+                                }
                             }
-                            SidebarItem(icon: "square.stack.fill", title: "Albums", isSelected: selectedItem == .albums) {
-                                selectedItem = .albums
+                            if showAlbums {
+                                SidebarItem(icon: "square.stack.fill", title: "Albums", isSelected: selectedItem == .albums) {
+                                    selectedItem = .albums
+                                }
                             }
-                            SidebarItem(icon: "music.note.list", title: "Songs", isSelected: selectedItem == .songs) {
-                                selectedItem = .songs
+                            if showSongs {
+                                SidebarItem(icon: "music.note.list", title: "Songs", isSelected: selectedItem == .songs) {
+                                    selectedItem = .songs
+                                }
                             }
                         }
                         .padding(.horizontal, 8)
@@ -259,6 +274,14 @@ struct LiquidGlassSidebar: View {
         .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 5)
         .padding(.leading, 10)
         .padding(.vertical, 10)
+        .sheet(isPresented: $showLibrarySettings) {
+            LibrarySettingsSheet(
+                showRecentlyAdded: $showRecentlyAdded,
+                showArtists: $showArtists,
+                showAlbums: $showAlbums,
+                showSongs: $showSongs
+            )
+        }
     }
 }
 
@@ -344,15 +367,110 @@ struct SearchField: View {
 // MARK: - Section Header
 struct SectionHeader: View {
     let title: String
+    var showEditButton: Bool = false
+    var onEdit: (() -> Void)? = nil
+    @State private var isHovered = false
     
     var body: some View {
-        Text(title)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(.secondary)
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 4)
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+            
+            Spacer()
+            
+            if showEditButton && isHovered {
+                Button(action: {
+                    onEdit?()
+                }) {
+                    Image(systemName: "slider.horizontal.3")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .padding(4)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 4)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
+// MARK: - Library Settings Sheet
+struct LibrarySettingsSheet: View {
+    @Environment(\.dismiss) var dismiss
+    @Binding var showRecentlyAdded: Bool
+    @Binding var showArtists: Bool
+    @Binding var showAlbums: Bool
+    @Binding var showSongs: Bool
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Library Categories")
+                    .font(.system(size: 18, weight: .semibold))
+                
+                Spacer()
+                
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(20)
+            
+            Divider()
+            
+            // Settings list
+            VStack(spacing: 0) {
+                ToggleRow(title: "Recently Added", icon: "clock.fill", isOn: $showRecentlyAdded)
+                Divider().padding(.leading, 56)
+                
+                ToggleRow(title: "Artists", icon: "music.mic", isOn: $showArtists)
+                Divider().padding(.leading, 56)
+                
+                ToggleRow(title: "Albums", icon: "square.stack.fill", isOn: $showAlbums)
+                Divider().padding(.leading, 56)
+                
+                ToggleRow(title: "Songs", icon: "music.note.list", isOn: $showSongs)
+            }
+            .padding(.vertical, 8)
+            
+            Spacer()
+        }
+        .frame(width: 400, height: 300)
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
+}
+
+struct ToggleRow: View {
+    let title: String
+    let icon: String
+    @Binding var isOn: Bool
+    
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 16))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 24)
+                
+                Text(title)
+                    .font(.system(size: 14))
+            }
+        }
+        .toggleStyle(.switch)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
     }
 }
 
