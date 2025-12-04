@@ -989,7 +989,7 @@ struct NewSongsView: View {
                 }
                 .buttonStyle(.plain)
                 
-                // Search field
+                // Search field with liquid glass design
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13))
@@ -1002,7 +1002,25 @@ struct NewSongsView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .frame(width: 280)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.2),
+                                        Color.white.opacity(0.05)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    }
+                )
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
