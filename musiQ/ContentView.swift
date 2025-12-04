@@ -581,8 +581,8 @@ struct MainContentView: View {
                 
             case .songs:
                 NewSongsView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.bottom, 72)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
             case .recentlyAdded:
                 VStack(spacing: 0) {
@@ -963,7 +963,7 @@ struct NewSongsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
             // Header with title, filter, and search
             HStack(spacing: 16) {
                 Text("Songs")
@@ -1009,6 +1009,7 @@ struct NewSongsView: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
             .background(Color(nsColor: .windowBackgroundColor))
+            .frame(maxWidth: .infinity)
             
             Divider()
             
