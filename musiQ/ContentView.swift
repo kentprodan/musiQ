@@ -580,14 +580,8 @@ struct MainContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
             case .songs:
-                VStack(spacing: 0) {
-                    TopNavigationBar(searchText: $searchText, title: selectedNavItem.rawValue)
-                        .frame(height: 52)
-                        .background(Color(nsColor: .windowBackgroundColor))
-                    Divider()
-                    SongsTableView()
-                        .padding(.bottom, 72)
-                }
+                NewSongsView()
+                    .padding(.bottom, 72)
                 
             case .recentlyAdded:
                 VStack(spacing: 0) {
@@ -918,7 +912,216 @@ struct TopNavigationBar: View {
     }
 }
 
-// MARK: - Songs Table View
+// MARK: - New Songs View
+struct NewSongsView: View {
+    @State private var tracks: [TrackRecord] = []
+    @State private var isLoading = false
+    @State private var searchText = ""
+    @State private var sortColumn: SongColumn = .title
+    @State private var sortAscending = true
+    @ObservedObject var audioEngine = AudioEngine.shared
+    
+    enum SongColumn: String, CaseIterable {
+        case title = "Title"
+        case time = "Time"
+        case artist = "Artist"
+        case album = "Album"
+        case genre = "Genre"
+        case rating = "Rating"
+        case plays = "Plays"
+    }
+    
+    var filteredTracks: [TrackRecord] {
+        let filtered = searchText.isEmpty ? tracks : tracks.filter {
+            $0.title.localizedCaseInsensitiveContains(searchText) ||
+            $0.artist.localizedCaseInsensitiveContains(searchText) ||
+            $0.album.localizedCaseInsensitiveContains(searchText) ||
+            ($0.genre?.localizedCaseInsensitiveContains(searchText) ?? false)
+        }
+        
+        return filtered.sorted { track1, track2 in
+            let result: Bool
+            switch sortColumn {
+            case .title:
+                result = track1.title.localizedCompare(track2.title) == .orderedAscending
+            case .time:
+                result = track1.duration < track2.duration
+            case .artist:
+                result = track1.artist.localizedCompare(track2.artist) == .orderedAscending
+            case .album:
+                result = track1.album.localizedCompare(track2.album) == .orderedAscending
+            case .genre:
+                result = (track1.genre ?? "").localizedCompare(track2.genre ?? "") == .orderedAscending
+            case .rating:
+                result = track1.rating < track2.rating
+            case .plays:
+                result = track1.playCount < track2.playCount
+            }
+            return sortAscending ? result : !result
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header with title, filter, and search
+            HStack(spacing: 16) {
+                Text("Songs")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundStyle(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    // Filter action placeholder
+                }) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                            .font(.system(size: 16))
+                        Text("Filter")
+                            .font(.system(size: 13))
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color(nsColor: .controlBackgroundColor))
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                // Search field
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                    
+                    TextField("Search songs", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 13))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .frame(width: 280)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+            .background(Color(nsColor: .windowBackgroundColor))
+            
+            Divider()
+            
+            // Table
+            if isLoading {
+                VStack {
+                    Spacer()
+                    ProgressView("Loading tracks...")
+                    Spacer()
+                }
+            } else if filteredTracks.isEmpty {
+                VStack(spacing: 12) {
+                    Spacer()
+                    Image(systemName: "music.note.list")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.secondary)
+                    Text(searchText.isEmpty ? "No tracks in library" : "No matching tracks")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+            } else {
+                Table(filteredTracks) {
+                    TableColumn("Title") { track in
+                        Text(track.title)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.primary)
+                    }
+                    .width(min: 150, ideal: 250, max: 400)
+                    
+                    TableColumn("Time") { track in
+                        Text(formatDuration(track.duration))
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    .width(min: 50, ideal: 60, max: 80)
+                    
+                    TableColumn("Artist") { track in
+                        Text(track.artist)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    .width(min: 100, ideal: 150, max: 300)
+                    
+                    TableColumn("Album") { track in
+                        Text(track.album)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    .width(min: 100, ideal: 150, max: 300)
+                    
+                    TableColumn("Genre") { track in
+                        Text(track.genre ?? "")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    .width(min: 80, ideal: 120, max: 200)
+                    
+                    TableColumn("Rating") { track in
+                        HStack(spacing: 2) {
+                            ForEach(0..<5) { index in
+                                Image(systemName: index < track.rating ? "star.fill" : "star")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.orange)
+                            }
+                        }
+                    }
+                    .width(min: 70, ideal: 90, max: 120)
+                    
+                    TableColumn("Plays") { track in
+                        Text("\\(track.playCount)")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                    .width(min: 50, ideal: 60, max: 80)
+                }
+            }
+        }
+        .onAppear {
+            loadTracks()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .databaseDidChange)) { _ in
+            loadTracks()
+        }
+    }
+    
+    private func loadTracks() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let loadedTracks = try DatabaseManager.shared.getAllTracks()
+                DispatchQueue.main.async {
+                    self.tracks = loadedTracks
+                    self.isLoading = false
+                    print("📚 Loaded \\(loadedTracks.count) tracks")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.tracks = []
+                    self.isLoading = false
+                    print("❌ Failed to load tracks: \\(error)")
+                }
+            }
+        }
+    }
+    
+    private func formatDuration(_ duration: Double) -> String {
+        let minutes = Int(duration) / 60
+        let seconds = Int(duration) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+}
+
+// MARK: - Songs Table View (OLD - Keep for reference)
 struct SongsTableView: View {
     @State private var tracks: [TrackRecord] = []
     @State private var isLoading = false

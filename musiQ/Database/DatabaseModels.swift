@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 
 /// Track database record
-struct TrackRecord: Codable, FetchableRecord, PersistableRecord {
+struct TrackRecord: Codable, FetchableRecord, PersistableRecord, Identifiable {
     var id: Int64?
     var title: String
     var artist: String
