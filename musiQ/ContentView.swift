@@ -973,19 +973,29 @@ struct NewSongsView: View {
                 Button(action: {
                     // Filter action placeholder
                 }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                            .font(.system(size: 16))
-                        Text("Filter")
-                            .font(.system(size: 13))
-                    }
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color(nsColor: .controlBackgroundColor))
-                    )
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            ZStack {
+                                Circle()
+                                    .fill(.ultraThinMaterial)
+                                Circle()
+                                    .strokeBorder(
+                                        LinearGradient(
+                                            colors: [
+                                                Color.white.opacity(0.2),
+                                                Color.white.opacity(0.05)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            }
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
                 }
                 .buttonStyle(.plain)
                 
