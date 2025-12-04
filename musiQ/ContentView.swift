@@ -33,16 +33,10 @@ struct ContentView: View {
                     
                     // 2. Main Content Area
                     ZStack(alignment: .bottom) {
-                        ScrollView([.horizontal, .vertical], showsIndicators: true) {
-                            VStack(spacing: 0) {
-                                MainContentView(
-                                    selectedNavItem: selectedNavItem,
-                                    searchText: $searchText
-                                )
-                                .frame(minWidth: 600, minHeight: 400)
-                                .padding(.bottom, 120) // Space for floating playback bar
-                            }
-                        }
+                        MainContentView(
+                            selectedNavItem: selectedNavItem,
+                            searchText: $searchText
+                        )
                         .frame(width: showSidebar ? max(200, geometry.size.width - sidebarWidth - 1) : geometry.size.width, height: geometry.size.height)
                         
                         // Floating Liquid Glass Playback Bar
