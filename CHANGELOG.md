@@ -2,6 +2,40 @@
 
 All notable changes to musiQ will be documented in this file.
 
+## [0.3.0] - 2025-12-04
+
+### Added - Library Customization & Organization
+- **Genres View**: Browse music by genre
+  - Grid layout with genre cards
+  - Purple-pink gradient backgrounds with guitar icons
+  - Track count display for each genre
+  - Database query with GROUP BY genre
+  - Integrated into customizable library categories
+- **Library Category Customization**: Edit button in Library section header
+  - Inline checkbox editing mode (no popup)
+  - Toggle visibility for Recently Added, Artists, Albums, Songs, Genres
+  - Settings persist using @AppStorage (UserDefaults)
+  - Edit/Done button with hover state
+  - All categories visible by default
+- **Playlists Section Collapse**: Minimize playlists in sidebar
+  - Chevron icon appears on hover over Playlists header
+  - Click to collapse/expand playlist items
+  - Smooth animation (0.2s ease-in-out)
+  - State persists across app launches
+  - Helps reduce sidebar clutter
+
+### Changed
+- Library section now fully customizable with 5 category options
+- SectionHeader component enhanced with edit and collapse functionality
+- Playlists section can be collapsed to save sidebar space
+
+### Technical
+- Added `getAllGenres()` to DatabaseManager with SQL GROUP BY
+- LibraryCheckboxItem component for inline editing
+- Enhanced SectionHeader with dual button support (edit + collapse)
+- @AppStorage for showRecentlyAdded, showArtists, showAlbums, showSongs, showGenres, playlistsCollapsed
+- GenresView follows same pattern as ArtistsView/AlbumsView with grid layout
+
 ## [0.2.0] - 2025-12-04
 
 ### Added - Settings System
