@@ -1,0 +1,414 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DF24B0CE2EE1B38A001D4BE0 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = DF24B0CD2EE1B38A001D4BE0 /* GRDB */; };
+		DF24B0D62EE1B59F001D4BE0 /* libbassflac.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DF24B0D22EE1B59F001D4BE0 /* libbassflac.dylib */; };
+		DF24B0D72EE1B59F001D4BE0 /* libbassflac.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF24B0D22EE1B59F001D4BE0 /* libbassflac.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DF24B0D82EE1B59F001D4BE0 /* libbass.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DF24B0D32EE1B59F001D4BE0 /* libbass.dylib */; };
+		DF24B0D92EE1B59F001D4BE0 /* libbass.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF24B0D32EE1B59F001D4BE0 /* libbass.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DF24B0DA2EE1B59F001D4BE0 /* libbassdsd.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DF24B0D42EE1B59F001D4BE0 /* libbassdsd.dylib */; };
+		DF24B0DB2EE1B59F001D4BE0 /* libbassdsd.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF24B0D42EE1B59F001D4BE0 /* libbassdsd.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		DF24B0DC2EE1B59F001D4BE0 /* libbassopus.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DF24B0D52EE1B59F001D4BE0 /* libbassopus.dylib */; };
+		DF24B0DD2EE1B59F001D4BE0 /* libbassopus.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = DF24B0D52EE1B59F001D4BE0 /* libbassopus.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DF24B0DE2EE1B59F001D4BE0 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DF24B0D72EE1B59F001D4BE0 /* libbassflac.dylib in Embed Libraries */,
+				DF24B0DB2EE1B59F001D4BE0 /* libbassdsd.dylib in Embed Libraries */,
+				DF24B0DD2EE1B59F001D4BE0 /* libbassopus.dylib in Embed Libraries */,
+				DF24B0D92EE1B59F001D4BE0 /* libbass.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		DF24B0982EE187C5001D4BE0 /* musiQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = musiQ.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF24B0D22EE1B59F001D4BE0 /* libbassflac.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbassflac.dylib; path = Frameworks/libbassflac.dylib; sourceTree = "<group>"; };
+		DF24B0D32EE1B59F001D4BE0 /* libbass.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbass.dylib; path = Frameworks/libbass.dylib; sourceTree = "<group>"; };
+		DF24B0D42EE1B59F001D4BE0 /* libbassdsd.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbassdsd.dylib; path = Frameworks/libbassdsd.dylib; sourceTree = "<group>"; };
+		DF24B0D52EE1B59F001D4BE0 /* libbassopus.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbassopus.dylib; path = Frameworks/libbassopus.dylib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		DF24B09A2EE187C5001D4BE0 /* musiQ */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = musiQ;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DF24B0952EE187C5001D4BE0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DF24B0CE2EE1B38A001D4BE0 /* GRDB in Frameworks */,
+				DF24B0D62EE1B59F001D4BE0 /* libbassflac.dylib in Frameworks */,
+				DF24B0D82EE1B59F001D4BE0 /* libbass.dylib in Frameworks */,
+				DF24B0DC2EE1B59F001D4BE0 /* libbassopus.dylib in Frameworks */,
+				DF24B0DA2EE1B59F001D4BE0 /* libbassdsd.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DF24B08F2EE187C5001D4BE0 = {
+			isa = PBXGroup;
+			children = (
+				DF24B09A2EE187C5001D4BE0 /* musiQ */,
+				DF24B0D12EE1B59E001D4BE0 /* Frameworks */,
+				DF24B0992EE187C5001D4BE0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DF24B0992EE187C5001D4BE0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DF24B0982EE187C5001D4BE0 /* musiQ.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DF24B0D12EE1B59E001D4BE0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DF24B0D32EE1B59F001D4BE0 /* libbass.dylib */,
+				DF24B0D42EE1B59F001D4BE0 /* libbassdsd.dylib */,
+				DF24B0D22EE1B59F001D4BE0 /* libbassflac.dylib */,
+				DF24B0D52EE1B59F001D4BE0 /* libbassopus.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DF24B0972EE187C5001D4BE0 /* musiQ */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DF24B0A32EE187C6001D4BE0 /* Build configuration list for PBXNativeTarget "musiQ" */;
+			buildPhases = (
+				DF24B0942EE187C5001D4BE0 /* Sources */,
+				DF24B0952EE187C5001D4BE0 /* Frameworks */,
+				DF24B0962EE187C5001D4BE0 /* Resources */,
+				DF24B0DE2EE1B59F001D4BE0 /* Embed Libraries */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DF24B09A2EE187C5001D4BE0 /* musiQ */,
+			);
+			name = musiQ;
+			packageProductDependencies = (
+				DF24B0CD2EE1B38A001D4BE0 /* GRDB */,
+			);
+			productName = musiQ;
+			productReference = DF24B0982EE187C5001D4BE0 /* musiQ.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DF24B0902EE187C5001D4BE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2610;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					DF24B0972EE187C5001D4BE0 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+				};
+			};
+			buildConfigurationList = DF24B0932EE187C5001D4BE0 /* Build configuration list for PBXProject "musiQ" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DF24B08F2EE187C5001D4BE0;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DF24B0CC2EE1B38A001D4BE0 /* XCRemoteSwiftPackageReference "GRDB" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = DF24B0992EE187C5001D4BE0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DF24B0972EE187C5001D4BE0 /* musiQ */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DF24B0962EE187C5001D4BE0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DF24B0942EE187C5001D4BE0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		DF24B0A12EE187C6001D4BE0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		DF24B0A22EE187C6001D4BE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		DF24B0A42EE187C6001D4BE0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = musiQ.musiQ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/musiQ/Engine/BASS-Bridging-Header.h";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DF24B0A52EE187C6001D4BE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = musiQ.musiQ;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/musiQ/Engine/BASS-Bridging-Header.h";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DF24B0932EE187C5001D4BE0 /* Build configuration list for PBXProject "musiQ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF24B0A12EE187C6001D4BE0 /* Debug */,
+				DF24B0A22EE187C6001D4BE0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DF24B0A32EE187C6001D4BE0 /* Build configuration list for PBXNativeTarget "musiQ" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF24B0A42EE187C6001D4BE0 /* Debug */,
+				DF24B0A52EE187C6001D4BE0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DF24B0CC2EE1B38A001D4BE0 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DF24B0CD2EE1B38A001D4BE0 /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF24B0CC2EE1B38A001D4BE0 /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = DF24B0902EE187C5001D4BE0 /* Project object */;
+}
