@@ -1004,14 +1004,12 @@ struct NewSongsView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
-                    
                     TextField("Search songs", text: $searchText)
                         .textFieldStyle(.plain)
                         .font(.system(size: 13))
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .frame(width: 280)
+                .frame(width: 280, height: 36)
                 .background(
                     ZStack {
                         Capsule()
