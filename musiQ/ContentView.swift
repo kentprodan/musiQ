@@ -402,7 +402,7 @@ struct SectionHeader: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(title)
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
             
