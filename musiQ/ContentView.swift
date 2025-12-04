@@ -470,23 +470,23 @@ struct LibraryCheckboxItem: View {
         }) {
             HStack(spacing: 10) {
                 Image(systemName: isChecked ? "checkmark.square.fill" : "square")
-                    .font(.system(size: 16))
-                    .foregroundStyle(isChecked ? .blue : .secondary)
-                    .frame(width: 32, height: 32)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(isChecked ? .orange : .white.opacity(0.6))
+                    .frame(width: 18)
                 
                 Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 20)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(width: 18)
                 
                 Text(title)
                     .font(.system(size: 13))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                 
                 Spacer()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
