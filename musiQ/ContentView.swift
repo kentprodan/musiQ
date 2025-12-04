@@ -414,9 +414,17 @@ struct SectionHeader: View {
                     Text(isEditing ? "Done" : "Edit")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(isEditing ? .blue : (isHovered ? .primary : .secondary))
+                        .frame(height: 20)
                 }
                 .buttonStyle(.plain)
+                .contentShape(Rectangle())
                 .opacity(isEditing || isHovered ? 1.0 : 0.0)
+                .allowsHitTesting(true)
+                .onHover { hovering in
+                    if hovering {
+                        isHovered = true
+                    }
+                }
             }
             
             if showCollapseButton {
