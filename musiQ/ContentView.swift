@@ -159,11 +159,12 @@ struct LiquidGlassSidebar: View {
                         .padding(.horizontal, 8)
                         
                         // Library Section
-                        SectionHeader(title: "Library", showEditButton: true, isEditing: showLibrarySettings) {
+                        SectionHeader(title: "Library", showEditButton: true, isEditing: showLibrarySettings, onEdit: {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 showLibrarySettings.toggle()
                             }
-                        }
+                            print("📝 Library Edit toggled: \(showLibrarySettings)")
+                        })
                         .padding(.top, 16)
                         
                         VStack(spacing: 1) {
