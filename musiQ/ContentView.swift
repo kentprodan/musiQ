@@ -155,30 +155,41 @@ struct LiquidGlassSidebar: View {
                         .padding(.horizontal, 8)
                         
                         // Library Section
-                        SectionHeader(title: "Library", showEditButton: true) {
-                            showLibrarySettings = true
+                        SectionHeader(title: "Library", showEditButton: true, isEditing: showLibrarySettings) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showLibrarySettings.toggle()
+                            }
                         }
                         .padding(.top, 16)
                         
                         VStack(spacing: 1) {
-                            if showRecentlyAdded {
-                                SidebarItem(icon: "clock.fill", title: "Recently Added", isSelected: selectedItem == .recentlyAdded) {
-                                    selectedItem = .recentlyAdded
+                            if showLibrarySettings {
+                                // Edit mode - show checkboxes
+                                LibraryCheckboxItem(icon: "clock.fill", title: "Recently Added", isChecked: $showRecentlyAdded)
+                                LibraryCheckboxItem(icon: "music.mic", title: "Artists", isChecked: $showArtists)
+                                LibraryCheckboxItem(icon: "square.stack.fill", title: "Albums", isChecked: $showAlbums)
+                                LibraryCheckboxItem(icon: "music.note.list", title: "Songs", isChecked: $showSongs)
+                            } else {
+                                // Normal mode - show only checked items
+                                if showRecentlyAdded {
+                                    SidebarItem(icon: "clock.fill", title: "Recently Added", isSelected: selectedItem == .recentlyAdded) {
+                                        selectedItem = .recentlyAdded
+                                    }
                                 }
-                            }
-                            if showArtists {
-                                SidebarItem(icon: "music.mic", title: "Artists", isSelected: selectedItem == .artists) {
-                                    selectedItem = .artists
+                                if showArtists {
+                                    SidebarItem(icon: "music.mic", title: "Artists", isSelected: selectedItem == .artists) {
+                                        selectedItem = .artists
+                                    }
                                 }
-                            }
-                            if showAlbums {
-                                SidebarItem(icon: "square.stack.fill", title: "Albums", isSelected: selectedItem == .albums) {
-                                    selectedItem = .albums
+                                if showAlbums {
+                                    SidebarItem(icon: "square.stack.fill", title: "Albums", isSelected: selectedItem == .albums) {
+                                        selectedItem = .albums
+                                    }
                                 }
-                            }
-                            if showSongs {
-                                SidebarItem(icon: "music.note.list", title: "Songs", isSelected: selectedItem == .songs) {
-                                    selectedItem = .songs
+                                if showSongs {
+                                    SidebarItem(icon: "music.note.list", title: "Songs", isSelected: selectedItem == .songs) {
+                                        selectedItem = .songs
+                                    }
                                 }
                             }
                         }
@@ -274,14 +285,6 @@ struct LiquidGlassSidebar: View {
         .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 5)
         .padding(.leading, 10)
         .padding(.vertical, 10)
-        .sheet(isPresented: $showLibrarySettings) {
-            LibrarySettingsSheet(
-                showRecentlyAdded: $showRecentlyAdded,
-                showArtists: $showArtists,
-                showAlbums: $showAlbums,
-                showSongs: $showSongs
-            )
-        }
     }
 }
 
@@ -368,6 +371,7 @@ struct SearchField: View {
 struct SectionHeader: View {
     let title: String
     var showEditButton: Bool = false
+    var isEditing: Bool = false
     var onEdit: (() -> Void)? = nil
     @State private var isHovered = false
     
@@ -384,12 +388,12 @@ struct SectionHeader: View {
                 Button(action: {
                     onEdit?()
                 }) {
-                    Text("Edit")
+                    Text(isEditing ? "Done" : "Edit")
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(isHovered ? .primary : .secondary)
+                        .foregroundStyle(isEditing ? .blue : (isHovered ? .primary : .secondary))
                 }
                 .buttonStyle(.plain)
-                .opacity(isHovered ? 1.0 : 0.0)
+                .opacity(isEditing || isHovered ? 1.0 : 0.0)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -402,76 +406,39 @@ struct SectionHeader: View {
     }
 }
 
-// MARK: - Library Settings Sheet
-struct LibrarySettingsSheet: View {
-    @Environment(\.dismiss) var dismiss
-    @Binding var showRecentlyAdded: Bool
-    @Binding var showArtists: Bool
-    @Binding var showAlbums: Bool
-    @Binding var showSongs: Bool
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text("Library Categories")
-                    .font(.system(size: 18, weight: .semibold))
-                
-                Spacer()
-                
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(20)
-            
-            Divider()
-            
-            // Settings list
-            VStack(spacing: 0) {
-                ToggleRow(title: "Recently Added", icon: "clock.fill", isOn: $showRecentlyAdded)
-                Divider().padding(.leading, 56)
-                
-                ToggleRow(title: "Artists", icon: "music.mic", isOn: $showArtists)
-                Divider().padding(.leading, 56)
-                
-                ToggleRow(title: "Albums", icon: "square.stack.fill", isOn: $showAlbums)
-                Divider().padding(.leading, 56)
-                
-                ToggleRow(title: "Songs", icon: "music.note.list", isOn: $showSongs)
-            }
-            .padding(.vertical, 8)
-            
-            Spacer()
-        }
-        .frame(width: 400, height: 300)
-        .background(Color(nsColor: .windowBackgroundColor))
-    }
-}
-
-struct ToggleRow: View {
-    let title: String
+// MARK: - Library Checkbox Item
+struct LibraryCheckboxItem: View {
     let icon: String
-    @Binding var isOn: Bool
+    let title: String
+    @Binding var isChecked: Bool
     
     var body: some View {
-        Toggle(isOn: $isOn) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
+        Button(action: {
+            isChecked.toggle()
+        }) {
+            HStack(spacing: 10) {
+                Image(systemName: isChecked ? "checkmark.square.fill" : "square")
                     .font(.system(size: 16))
+                    .foregroundStyle(isChecked ? .blue : .secondary)
+                    .frame(width: 32, height: 32)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 14))
                     .foregroundStyle(.secondary)
-                    .frame(width: 24)
+                    .frame(width: 20)
                 
                 Text(title)
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
+                    .foregroundStyle(.primary)
+                
+                Spacer()
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
         }
-        .toggleStyle(.switch)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .buttonStyle(.plain)
+        .background(Color.clear)
     }
 }
 
