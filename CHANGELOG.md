@@ -2,6 +2,39 @@
 
 All notable changes to musiQ will be documented in this file.
 
+## [0.0.3] - 2025-12-04
+
+### Added - Home Dashboard
+- **HomeView**: Complete library statistics dashboard
+  - Display total songs, albums, artists, and genres
+  - Show storage used and total duration
+  - Track total play count across library
+  - Colorful stat cards with icons (orange, blue, purple, pink, green, indigo, red)
+  - Grid layout with responsive cards
+  - Real-time updates when library changes
+  - Loading and error states
+- **LibraryStats**: Database statistics model
+  - Counts for songs, albums, artists, genres
+  - Total file size with formatted display (GB/MB)
+  - Total duration with formatted display (hours/minutes)
+  - Total play count aggregation
+  - `getLibraryStats()` method in DatabaseManager
+
+### Changed
+- Home view now displays statistics instead of placeholder
+- Removed search field from sidebar for cleaner design
+- Removed top navigation bar from home view for full-screen dashboard
+
+### Fixed
+- SQL syntax for counting distinct album/artist combinations using subquery
+- Database statistics queries properly handle NULL and empty values
+
+### Technical
+- Added comprehensive logging to statistics loading
+- ByteCountFormatter for disk usage display
+- Duration formatting helper methods
+- Error handling with user-friendly messages
+
 ## [0.0.2] - 2025-12-04
 
 ### Added - Library Customization & Organization
