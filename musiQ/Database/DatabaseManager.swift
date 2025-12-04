@@ -260,17 +260,34 @@ class DatabaseManager {
     // MARK: - Library Statistics
     func getLibraryStats() throws -> LibraryStats {
         guard let dbQueue = dbQueue else {
+            print("❌ Database queue is nil in getLibraryStats")
             throw NSError(domain: "DatabaseManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
         }
         
+        print("📊 Database queue exists, reading stats...")
+        
         return try dbQueue.read { db in
+            print("📊 Executing SQL queries...")
             let songCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM tracks") ?? 0
+            print("   Songs: \(songCount)")
+            
             let albumCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT album, artist) FROM tracks WHERE album IS NOT NULL AND album != ''") ?? 0
+            print("   Albums: \(albumCount)")
+            
             let artistCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT artist) FROM tracks WHERE artist IS NOT NULL AND artist != ''") ?? 0
+            print("   Artists: \(artistCount)")
+            
             let genreCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT genre) FROM tracks WHERE genre IS NOT NULL AND genre != ''") ?? 0
+            print("   Genres: \(genreCount)")
+            
             let totalSize = try Int64.fetchOne(db, sql: "SELECT SUM(fileSize) FROM tracks") ?? 0
+            print("   Total size: \(totalSize)")
+            
             let totalDuration = try Double.fetchOne(db, sql: "SELECT SUM(duration) FROM tracks") ?? 0
+            print("   Total duration: \(totalDuration)")
+            
             let totalPlayCount = try Int.fetchOne(db, sql: "SELECT SUM(playCount) FROM tracks") ?? 0
+            print("   Total plays: \(totalPlayCount)")
             
             return LibraryStats(
                 songCount: songCount,
