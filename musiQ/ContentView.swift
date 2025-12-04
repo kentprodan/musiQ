@@ -508,11 +508,11 @@ struct SidebarItem: View {
                 Image(systemName: icon)
                     .font(.system(size: 14, weight: .medium))
                     .frame(width: 18)
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .foregroundStyle(isSelected ? .orange : .white)
                 
                 Text(title)
                     .font(.system(size: 13))
-                    .foregroundStyle(isSelected ? .primary : .secondary)
+                    .foregroundStyle(isSelected ? .orange : .white)
                 
                 Spacer()
             }
@@ -520,7 +520,7 @@ struct SidebarItem: View {
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(isSelected ? Color.accentColor.opacity(0.15) : (isHovered ? Color.black.opacity(0.05) : Color.clear))
+                    .fill(isSelected ? Color.orange.opacity(0.15) : (isHovered ? Color.white.opacity(0.05) : Color.clear))
             )
         }
         .buttonStyle(.plain)
