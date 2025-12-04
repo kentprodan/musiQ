@@ -1036,35 +1036,35 @@ struct NewSongsView: View {
                             .font(.system(size: 13))
                             .foregroundStyle(.primary)
                     }
-                    .width(min: 150, ideal: 250, max: 400)
+                    .width(min: 150, ideal: 300)
                     
                     TableColumn("Time") { track in
                         Text(formatDuration(track.duration))
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
-                    .width(min: 50, ideal: 60, max: 80)
+                    .width(min: 50, ideal: 60)
                     
                     TableColumn("Artist") { track in
                         Text(track.artist)
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
-                    .width(min: 100, ideal: 150, max: 300)
+                    .width(min: 100, ideal: 180)
                     
                     TableColumn("Album") { track in
                         Text(track.album)
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
-                    .width(min: 100, ideal: 150, max: 300)
+                    .width(min: 100, ideal: 180)
                     
                     TableColumn("Genre") { track in
                         Text(track.genre ?? "")
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
-                    .width(min: 80, ideal: 120, max: 200)
+                    .width(min: 80, ideal: 120)
                     
                     TableColumn("Rating") { track in
                         HStack(spacing: 2) {
@@ -1075,17 +1075,19 @@ struct NewSongsView: View {
                             }
                         }
                     }
-                    .width(min: 70, ideal: 90, max: 120)
+                    .width(min: 80, ideal: 90)
                     
                     TableColumn("Plays") { track in
                         Text("\\(track.playCount)")
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
-                    .width(min: 50, ideal: 60, max: 80)
+                    .width(min: 50, ideal: 60)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             loadTracks()
         }
