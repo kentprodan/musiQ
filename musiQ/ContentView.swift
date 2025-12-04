@@ -669,9 +669,12 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 32) {
                 if isLoading {
-                    ProgressView("Loading library statistics...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding(.top, 100)
+                    VStack {
+                        Spacer()
+                        ProgressView("Loading library statistics...")
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 400)
                 } else if let stats = stats {
                     // Header
                     VStack(spacing: 8) {
@@ -749,11 +752,26 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 40)
                     .padding(.bottom, 40)
+                } else {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("Unable to load library statistics")
+                            .font(.system(size: 16, weight: .medium))
+                        Text("Your library might be empty or there was an error")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 400)
                 }
             }
             .frame(maxWidth: .infinity)
         }
         .onAppear {
+            print("🏠 HomeView appeared, loading stats...")
             loadStats()
         }
         .onReceive(NotificationCenter.default.publisher(for: .databaseDidChange)) { _ in
@@ -762,20 +780,23 @@ struct HomeView: View {
     }
     
     private func loadStats() {
+        print("🔄 Starting to load library stats...")
         isLoading = true
         DispatchQueue.global(qos: .userInitiated).async {
             do {
+                print("📊 Fetching stats from database...")
                 let loadedStats = try DatabaseManager.shared.getLibraryStats()
+                print("✅ Stats fetched: \(loadedStats.songCount) songs, \(loadedStats.albumCount) albums, \(loadedStats.artistCount) artists")
                 DispatchQueue.main.async {
                     self.stats = loadedStats
                     self.isLoading = false
-                    print("📊 Library stats loaded: \(loadedStats.songCount) songs, \(loadedStats.albumCount) albums")
+                    print("✅ Stats applied to UI")
                 }
             } catch {
+                print("❌ Failed to load library stats: \(error)")
                 DispatchQueue.main.async {
                     self.stats = nil
                     self.isLoading = false
-                    print("❌ Failed to load library stats: \(error)")
                 }
             }
         }
