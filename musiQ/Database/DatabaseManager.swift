@@ -256,4 +256,60 @@ class DatabaseManager {
         let totalCount = try getAllTracks().count
         print("✅ Database now contains \(totalCount) total tracks")
     }
+    
+    // MARK: - Library Statistics
+    func getLibraryStats() throws -> LibraryStats {
+        guard let dbQueue = dbQueue else {
+            throw NSError(domain: "DatabaseManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Database not initialized"])
+        }
+        
+        return try dbQueue.read { db in
+            let songCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM tracks") ?? 0
+            let albumCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT album, artist) FROM tracks WHERE album IS NOT NULL AND album != ''") ?? 0
+            let artistCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT artist) FROM tracks WHERE artist IS NOT NULL AND artist != ''") ?? 0
+            let genreCount = try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT genre) FROM tracks WHERE genre IS NOT NULL AND genre != ''") ?? 0
+            let totalSize = try Int64.fetchOne(db, sql: "SELECT SUM(fileSize) FROM tracks") ?? 0
+            let totalDuration = try Double.fetchOne(db, sql: "SELECT SUM(duration) FROM tracks") ?? 0
+            let totalPlayCount = try Int.fetchOne(db, sql: "SELECT SUM(playCount) FROM tracks") ?? 0
+            
+            return LibraryStats(
+                songCount: songCount,
+                albumCount: albumCount,
+                artistCount: artistCount,
+                genreCount: genreCount,
+                totalSize: totalSize,
+                totalDuration: totalDuration,
+                totalPlayCount: totalPlayCount
+            )
+        }
+    }
+}
+
+// MARK: - Library Statistics Model
+struct LibraryStats {
+    let songCount: Int
+    let albumCount: Int
+    let artistCount: Int
+    let genreCount: Int
+    let totalSize: Int64
+    let totalDuration: Double
+    let totalPlayCount: Int
+    
+    var formattedSize: String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = [.useGB, .useMB]
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: totalSize)
+    }
+    
+    var formattedDuration: String {
+        let hours = Int(totalDuration) / 3600
+        let minutes = (Int(totalDuration) % 3600) / 60
+        
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(minutes)m"
+        }
+    }
 }

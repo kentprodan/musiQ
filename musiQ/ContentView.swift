@@ -635,18 +635,191 @@ struct MainContentView: View {
                         .padding(.bottom, 72)
                 }
                 
-            case .home, .playlists:
+            case .home:
                 VStack(spacing: 0) {
-                    TopNavigationBar(searchText: $searchText, title: selectedNavItem.rawValue)
+                    TopNavigationBar(searchText: $searchText, title: "Home")
                         .frame(height: 52)
                         .background(Color(nsColor: .windowBackgroundColor))
                     Divider()
-                    PlaceholderView(title: selectedNavItem.rawValue)
+                    HomeView()
+                        .padding(.bottom, 72)
+                }
+                
+            case .playlists:
+                VStack(spacing: 0) {
+                    TopNavigationBar(searchText: $searchText, title: "Playlists")
+                        .frame(height: 52)
+                        .background(Color(nsColor: .windowBackgroundColor))
+                    Divider()
+                    PlaceholderView(title: "Playlists")
                         .padding(.bottom, 72)
                 }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+// MARK: - Home View
+struct HomeView: View {
+    @State private var stats: LibraryStats?
+    @State private var isLoading = true
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 32) {
+                if isLoading {
+                    ProgressView("Loading library statistics...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(.top, 100)
+                } else if let stats = stats {
+                    // Header
+                    VStack(spacing: 8) {
+                        Text("Your Library")
+                            .font(.system(size: 32, weight: .bold))
+                        Text("Overview of your music collection")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.top, 40)
+                    
+                    // Stats Grid
+                    LazyVGrid(columns: [
+                        GridItem(.flexible(), spacing: 20),
+                        GridItem(.flexible(), spacing: 20),
+                        GridItem(.flexible(), spacing: 20),
+                        GridItem(.flexible(), spacing: 20)
+                    ], spacing: 20) {
+                        StatCard(
+                            icon: "music.note",
+                            title: "Songs",
+                            value: "\(stats.songCount)",
+                            color: .orange
+                        )
+                        
+                        StatCard(
+                            icon: "square.stack.fill",
+                            title: "Albums",
+                            value: "\(stats.albumCount)",
+                            color: .blue
+                        )
+                        
+                        StatCard(
+                            icon: "music.mic",
+                            title: "Artists",
+                            value: "\(stats.artistCount)",
+                            color: .purple
+                        )
+                        
+                        StatCard(
+                            icon: "guitars.fill",
+                            title: "Genres",
+                            value: "\(stats.genreCount)",
+                            color: .pink
+                        )
+                    }
+                    .padding(.horizontal, 40)
+                    
+                    // Additional Stats
+                    LazyVGrid(columns: [
+                        GridItem(.flexible(), spacing: 20),
+                        GridItem(.flexible(), spacing: 20),
+                        GridItem(.flexible(), spacing: 20)
+                    ], spacing: 20) {
+                        StatCard(
+                            icon: "externaldrive.fill",
+                            title: "Storage Used",
+                            value: stats.formattedSize,
+                            color: .green
+                        )
+                        
+                        StatCard(
+                            icon: "clock.fill",
+                            title: "Total Duration",
+                            value: stats.formattedDuration,
+                            color: .indigo
+                        )
+                        
+                        StatCard(
+                            icon: "play.circle.fill",
+                            title: "Total Plays",
+                            value: "\(stats.totalPlayCount)",
+                            color: .red
+                        )
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 40)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .onAppear {
+            loadStats()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .databaseDidChange)) { _ in
+            loadStats()
+        }
+    }
+    
+    private func loadStats() {
+        isLoading = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let loadedStats = try DatabaseManager.shared.getLibraryStats()
+                DispatchQueue.main.async {
+                    self.stats = loadedStats
+                    self.isLoading = false
+                    print("📊 Library stats loaded: \(loadedStats.songCount) songs, \(loadedStats.albumCount) albums")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.stats = nil
+                    self.isLoading = false
+                    print("❌ Failed to load library stats: \(error)")
+                }
+            }
+        }
+    }
+}
+
+struct StatCard: View {
+    let icon: String
+    let title: String
+    let value: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 80, height: 80)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 32, weight: .medium))
+                    .foregroundStyle(color)
+            }
+            
+            VStack(spacing: 4) {
+                Text(value)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(.primary)
+                
+                Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(nsColor: .controlBackgroundColor))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
+        )
     }
 }
 
