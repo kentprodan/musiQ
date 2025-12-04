@@ -380,21 +380,22 @@ struct SectionHeader: View {
             
             Spacer()
             
-            if showEditButton && isHovered {
+            if showEditButton {
                 Button(action: {
                     onEdit?()
                 }) {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .padding(4)
+                    Text("Edit")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(isHovered ? .primary : .secondary)
                 }
                 .buttonStyle(.plain)
+                .opacity(isHovered ? 1.0 : 0.0)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 16)
         .padding(.bottom, 4)
+        .contentShape(Rectangle())
         .onHover { hovering in
             isHovered = hovering
         }
