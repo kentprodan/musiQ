@@ -611,9 +611,11 @@ struct MainContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
             case .songs:
-                NewSongsView(showSidebar: showSidebar)
-                    .padding(.bottom, 72)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                VStack(spacing: 0) {
+                    // Optional: Add a header or search bar if needed
+                    LibraryViewWrapper(searchText: $searchText)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
                 
             case .recentlyAdded:
                 VStack(spacing: 0) {

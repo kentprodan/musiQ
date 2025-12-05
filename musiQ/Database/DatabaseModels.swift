@@ -29,13 +29,18 @@ struct TrackRecord: Codable, FetchableRecord, PersistableRecord, Identifiable {
     
     // Convert to Track for AudioEngine
     func toTrack() -> Track {
-        Track(
+        var path = fileURL
+        if path.hasPrefix("file://") {
+            // Remove 'file://' prefix for local files
+            path = String(path.dropFirst(7))
+        }
+        return Track(
             id: id ?? 0,
             title: title,
             artist: artist,
             album: album,
             duration: duration,
-            fileURL: URL(string: fileURL),
+            fileURL: URL(fileURLWithPath: path),
             bitrate: bitrate ?? 0,
             sampleRate: sampleRate ?? 0,
             format: format

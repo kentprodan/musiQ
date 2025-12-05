@@ -57,6 +57,8 @@ class LibraryImporter {
                                     NotificationCenter.default.post(name: .databaseDidChange, object: nil)
                                 }
                             }
+                        } else {
+                            print("⚠️ Skipped (no duration/metadata): \(fileURL.lastPathComponent)")
                         }
                     }
                 }
@@ -95,8 +97,17 @@ class LibraryImporter {
     // MARK: - File Discovery
     private func findAudioFiles(in directory: URL) throws -> [URL] {
         let fileManager = FileManager.default
+        var isDirectory: ObjCBool = false
+        if fileManager.fileExists(atPath: directory.path, isDirectory: &isDirectory) {
+            // If a single file URL was provided, return it when supported
+            if !isDirectory.boolValue {
+                let ext = directory.pathExtension.lowercased()
+                return supportedExtensions.contains(ext) ? [directory] : []
+            }
+        }
+
         var audioFiles: [URL] = []
-        
+
         guard let enumerator = fileManager.enumerator(
             at: directory,
             includingPropertiesForKeys: [.isRegularFileKey],
@@ -180,7 +191,7 @@ class LibraryImporter {
             bitrate: bitrate,
             sampleRate: sampleRate,
             format: fileExtension,
-            fileURL: url.absoluteString,
+            fileURL: url.path,
             fileSize: fileSize,
             dateAdded: Date(),
             dateModified: fileAttributes?[.modificationDate] as? Date,

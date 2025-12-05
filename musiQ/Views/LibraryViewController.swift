@@ -13,6 +13,15 @@ class LibraryViewController: NSViewController {
     private var tracks: [TrackRecord] = []
     private var filteredTracks: [TrackRecord] = []
     private var cancellables = Set<AnyCancellable>()
+
+        // MARK: - Context Menu
+        private func setupContextMenu() {
+            let menu = NSMenu()
+            let deleteItem = NSMenuItem(title: "Delete", action: #selector(deleteSelectedTracks), keyEquivalent: "")
+            deleteItem.target = self
+            menu.addItem(deleteItem)
+            tableView.menu = menu
+        }
     
     // MARK: - Columns
     private enum ColumnIdentifier: String {
@@ -58,6 +67,7 @@ class LibraryViewController: NSViewController {
         tableView.allowsColumnReordering = true
         tableView.allowsColumnResizing = true
         tableView.usesAlternatingRowBackgroundColors = true
+        setupContextMenu()
         tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
         tableView.rowSizeStyle = .default
         tableView.target = self
@@ -77,6 +87,37 @@ class LibraryViewController: NSViewController {
         
         scrollView.documentView = tableView
         view.addSubview(scrollView)
+    }
+    
+    // MARK: - Delete Action
+    @objc private func deleteSelectedTracks() {
+        let selectedIndexes = tableView.selectedRowIndexes
+        guard !selectedIndexes.isEmpty else { return }
+
+        let tracksToDelete = selectedIndexes.compactMap { index -> TrackRecord? in
+            guard index < filteredTracks.count else { return nil }
+            return filteredTracks[index]
+        }
+
+        // Remove from database
+        DispatchQueue.global(qos: .userInitiated).async {
+            for track in tracksToDelete {
+                if let id = track.id {
+                    try? DatabaseManager.shared.deleteTrack(id: id)
+                }
+            }
+            DispatchQueue.main.async {
+                // Remove from UI
+                self.filteredTracks.removeAll { track in
+                    tracksToDelete.contains(where: { $0.id == track.id })
+                }
+                self.tracks.removeAll { track in
+                    tracksToDelete.contains(where: { $0.id == track.id })
+                }
+                self.tableView.reloadData()
+                print("🗑️ Deleted \(tracksToDelete.count) track(s) from library and database.")
+            }
+        }
     }
     
     private func addColumn(identifier: ColumnIdentifier, title: String, width: CGFloat) {
@@ -125,14 +166,29 @@ class LibraryViewController: NSViewController {
     // MARK: - Actions
     @objc private func handleDoubleClick() {
         let row = tableView.clickedRow
+        print("[DEBUG] Double-click detected on row: \(row)")
         guard row >= 0 && row < filteredTracks.count else { return }
-        
+
         let track = filteredTracks[row]
+        print("[DEBUG] Playing track: \(track.title)")
         playTrack(track)
     }
     
     private func playTrack(_ track: TrackRecord) {
-        AudioEngine.shared.play(track: track.toTrack())
+        let playTrack = track.toTrack()
+        guard let fileURL = playTrack.fileURL else {
+            print("❌ No file URL for track: \(playTrack.title)")
+            return
+        }
+        let filePath = fileURL.path
+        print("📁 LibraryViewController: Playing track - ID: \(playTrack.id), Title: \(playTrack.title), FileURL: \(filePath)")
+        let fileExists = FileManager.default.fileExists(atPath: filePath)
+        print("📂 File exists at path: \(fileExists)")
+        if fileExists {
+            AudioEngine.shared.play(track: playTrack)
+        } else {
+            print("❌ File does not exist at path: \(filePath)")
+        }
         
         // Update play count
         var updatedTrack = track
@@ -273,3 +329,4 @@ extension LibraryViewController: NSTableViewDelegate {
 extension Notification.Name {
     static let databaseDidChange = Notification.Name("databaseDidChange")
 }
+
