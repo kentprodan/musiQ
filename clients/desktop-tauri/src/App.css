@@ -1,0 +1,18 @@
+.app-shell {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--surface-window);
+  color: var(--text-primary);
+  font-family: var(--font-family-ui);
+}
+
+.app-shell__content-area {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface-content);
+}

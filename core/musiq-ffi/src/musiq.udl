@@ -1,0 +1,36 @@
+namespace musiq {};
+
+enum PlaybackState {
+  "Stopped",
+  "Playing",
+  "Paused",
+  "Buffering",
+};
+
+dictionary FfiTrack {
+  string id;
+  string title;
+  string artist;
+  string album;
+  u64 duration_ms;
+};
+
+callback interface PlaybackObserver {
+  void on_state_changed(PlaybackState state);
+  void on_position_changed(u64 position_ms);
+  void on_track_changed(FfiTrack track);
+};
+
+interface MusiqPlayer {
+  constructor(string library_db_path);
+
+  void play();
+  void pause();
+  void seek(u64 position_ms);
+  void skip_next();
+  void skip_previous();
+  void set_volume(f32 volume);
+
+  sequence<FfiTrack> list_queue();
+  void register_observer(PlaybackObserver observer);
+};

@@ -1,0 +1,35 @@
+.main-content-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  z-index: var(--z-content);
+}
+
+.app-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+}
+
+.main-content-view__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.main-content-view__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* Leaves room so content doesn't sit underneath the floating player bar. */
+  padding-bottom: calc(var(--player-bar-height) + var(--player-bar-bottom-offset) * 2);
+}
+
+.main-content-view__empty {
+  margin: auto;
+  color: var(--text-secondary);
+  font-size: 14px;
+}

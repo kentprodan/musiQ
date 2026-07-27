@@ -1,0 +1,11 @@
+[package]
+name = "musiq-metadata"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+lofty = "0.21"
+serde.workspace = true
+thiserror.workspace = true
+uuid.workspace = true

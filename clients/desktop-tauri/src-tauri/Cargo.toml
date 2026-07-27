@@ -1,0 +1,23 @@
+[package]
+name = "musiq-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-os = "2"
+tauri-plugin-window-state = "2"
+window-vibrancy = "0.5"
+musiq-core = { workspace = true }
+musiq-audio-engine = { workspace = true }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

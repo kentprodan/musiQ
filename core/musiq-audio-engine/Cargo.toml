@@ -1,0 +1,14 @@
+[package]
+name = "musiq-audio-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rodio = "0.19"
+symphonia = { version = "0.5", features = ["all"] }
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true

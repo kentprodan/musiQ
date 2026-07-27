@@ -1,0 +1,19 @@
+[package]
+name = "musiq-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "staticlib", "lib"]
+name = "musiq_ffi"
+
+[dependencies]
+musiq-core = { workspace = true }
+musiq-audio-engine = { workspace = true }
+uniffi = "0.28"
+tokio.workspace = true
+uuid.workspace = true
+
+[build-dependencies]
+uniffi = { version = "0.28", features = ["build"] }

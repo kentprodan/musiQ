@@ -1,0 +1,15 @@
+{
+  "id": "community.tiddl-bridge",
+  "name": "Tiddl Bridge",
+  "version": "0.1.0",
+  "author": "community",
+  "description": "Reference downloader-category plugin. Bridges musiQ's plugin host to a tiddl-style Tidal downloader so tracks the user already has legitimate access to under their own subscription can be saved into musiQ's managed library folder. Ships no bundled decryption logic itself — it only demonstrates the capability shape a downloader plugin requests.",
+  "kind": "wasm",
+  "entry_wasm": "plugin.wasm",
+  "capabilities": [
+    { "type": "network", "allowed_hosts": ["api.tidal.com"] },
+    { "type": "downloads_write" },
+    { "type": "library_read" }
+  ],
+  "hooks": ["on_settings_panel_render", "on_download_requested"]
+}

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>musiQ</title>
+  </head>
+  <body>
+    <!--
+      data-os and data-linux-de are set at runtime by detectPlatform.ts
+      before React mounts, so the very first paint already carries the
+      correct native design tokens with no flash of the wrong theme.
+    -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
