@@ -1,0 +1,16 @@
+[package]
+name = "musiq-uniffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "musiq_uniffi"
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+musiq-core = { path = "../../core/musiq-core" }
+uniffi = "0.31"
+thiserror = "1"

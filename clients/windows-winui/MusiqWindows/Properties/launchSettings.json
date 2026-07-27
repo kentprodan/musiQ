@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MusiqWindows (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "MusiqWindows (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

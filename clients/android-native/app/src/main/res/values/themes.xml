@@ -1,8 +1,0 @@
-<resources>
-    <!--
-      Minimal system theme — actual colors come from Compose's MusiqTheme
-      (Material 3 + Dynamic Color), this only needs to satisfy the
-      manifest's android:theme attribute before Compose takes over.
-    -->
-    <style name="Theme.Musiq" parent="android:Theme.Material.Light.NoActionBar" />
-</resources>

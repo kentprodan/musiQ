@@ -2,18 +2,17 @@
 name = "musiq-core"
 version.workspace = true
 edition.workspace = true
+authors.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
-musiq-db = { workspace = true }
-musiq-metadata = { workspace = true }
-musiq-audio-engine = { workspace = true }
-musiq-net = { workspace = true }
-musiq-plugins = { workspace = true }
-sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio"] }
-serde.workspace = true
-serde_json.workspace = true
-tokio.workspace = true
-thiserror.workspace = true
-tracing.workspace = true
-uuid.workspace = true
+rusqlite = { version = "0.31", features = ["bundled"] }
+lofty = "0.24"
+walkdir = "2"
+thiserror = "1"
+uuid = { version = "1", features = ["v4"] }
+time = { version = "0.3", features = ["formatting"] }
+
+[dev-dependencies]
+tempfile = "3"

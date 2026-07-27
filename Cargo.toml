@@ -1,15 +1,6 @@
 [workspace]
 resolver = "2"
-members = [
-    "core/musiq-core",
-    "core/musiq-db",
-    "core/musiq-metadata",
-    "core/musiq-audio-engine",
-    "core/musiq-net",
-    "core/musiq-plugins",
-    "core/musiq-ffi",
-    "clients/desktop-tauri/src-tauri",
-]
+members = ["core/musiq-core", "ffi/musiq-uniffi"]
 
 [workspace.package]
 version = "0.1.0"
@@ -18,24 +9,7 @@ authors = ["Kent Prodan"]
 license = "MIT"
 repository = "https://github.com/kentprodan/musiQ"
 
-[workspace.dependencies]
-musiq-db = { path = "core/musiq-db" }
-musiq-metadata = { path = "core/musiq-metadata" }
-musiq-audio-engine = { path = "core/musiq-audio-engine" }
-musiq-net = { path = "core/musiq-net" }
-musiq-plugins = { path = "core/musiq-plugins" }
-musiq-core = { path = "core/musiq-core" }
-
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "fs", "time"] }
-thiserror = "1"
-anyhow = "1"
-tracing = "0.1"
-uuid = { version = "1", features = ["v4", "serde"] }
-
 [profile.release]
 lto = true
 codegen-units = 1
-panic = "abort"
 strip = true

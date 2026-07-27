@@ -1,19 +1,144 @@
-//! musiq-core: composition root. Wires `musiq-db` (persistence),
-//! `musiq-metadata` (tag read/write), `musiq-audio-engine` (playback +
-//! waveform), `musiq-net` (Plex/Subsonic remote libraries), and
-//! `musiq-plugins` (sandboxed community plugins) into the one `Library`
-//! type every frontend holds a handle to — Tauri commands call it
-//! in-process, `musiq-ffi` wraps it for Swift/Kotlin.
+//! musiq-core: the one place library-management business logic lives —
+//! SQLite persistence, folder scanning, and tag reading. `ffi/musiq-uniffi`
+//! wraps this crate's public API for every native client (Swift/Kotlin/C#);
+//! this crate itself has no FFI-specific code in it.
 
-pub mod library;
-pub mod scan;
+mod db;
+mod error;
+mod scan;
 
-pub use library::Library;
+pub use error::MusiqError;
 
-#[derive(thiserror::Error, Debug)]
-pub enum CoreError {
-    #[error("db error: {0}")]
-    Db(#[from] musiq_db::DbError),
-    #[error("engine error: {0}")]
-    Engine(#[from] musiq_audio_engine::EngineError),
+use rusqlite::Connection;
+use std::path::Path;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Track {
+    pub id: String,
+    pub path: String,
+    pub title: Option<String>,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub duration_secs: Option<u32>,
+}
+
+pub struct Library {
+    conn: Connection,
+}
+
+impl Library {
+    /// Opens (creating if absent) the SQLite database at `db_path` and ensures
+    /// its schema exists.
+    pub fn open(db_path: &Path) -> Result<Self, MusiqError> {
+        let conn = db::open_connection(db_path)?;
+        Ok(Self { conn })
+    }
+
+    /// Recursively scans `folder` for audio files, reads their tags, and
+    /// upserts each one into the library. Returns the number of tracks
+    /// scanned (inserted or updated).
+    pub fn scan_folder(&self, folder: &Path) -> Result<u32, MusiqError> {
+        let count = scan::scan_folder(&self.conn, folder)?;
+        scan::record_scan_root(&self.conn, folder)?;
+        Ok(count)
+    }
+
+    /// Lists every track currently in the library, ordered by artist then album then title.
+    pub fn list_tracks(&self) -> Result<Vec<Track>, MusiqError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, path, title, artist, album, duration_secs
+             FROM tracks
+             ORDER BY artist, album, title",
+        )?;
+        let rows = stmt.query_map([], |row| {
+            Ok(Track {
+                id: row.get(0)?,
+                path: row.get(1)?,
+                title: row.get(2)?,
+                artist: row.get(3)?,
+                album: row.get(4)?,
+                duration_secs: row.get::<_, Option<u32>>(5)?,
+            })
+        })?;
+
+        let mut tracks = Vec::new();
+        for row in rows {
+            tracks.push(row?);
+        }
+        Ok(tracks)
+    }
+
+    /// Lists every folder that has been passed to `scan_folder`, in the order
+    /// it was first scanned.
+    pub fn list_scan_roots(&self) -> Result<Vec<String>, MusiqError> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT path FROM scan_roots ORDER BY added_at")?;
+        let rows = stmt.query_map([], |row| row.get::<_, String>(0))?;
+
+        let mut roots = Vec::new();
+        for row in rows {
+            roots.push(row?);
+        }
+        Ok(roots)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn open_creates_schema_and_starts_empty() {
+        let dir = tempfile::tempdir().unwrap();
+        let db_path = dir.path().join("library.sqlite3");
+
+        let library = Library::open(&db_path).unwrap();
+        let tracks = library.list_tracks().unwrap();
+
+        assert!(tracks.is_empty());
+        assert!(db_path.exists());
+    }
+
+    #[test]
+    fn scan_folder_rejects_non_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let db_path = dir.path().join("library.sqlite3");
+        let library = Library::open(&db_path).unwrap();
+
+        let not_a_dir = dir.path().join("does-not-exist");
+        let result = library.scan_folder(&not_a_dir);
+
+        assert!(matches!(result, Err(MusiqError::InvalidPath(_))));
+    }
+
+    #[test]
+    fn scan_folder_finds_no_tracks_in_empty_folder() {
+        let dir = tempfile::tempdir().unwrap();
+        let db_path = dir.path().join("library.sqlite3");
+        let library = Library::open(&db_path).unwrap();
+
+        let empty_music_dir = dir.path().join("music");
+        std::fs::create_dir(&empty_music_dir).unwrap();
+
+        let count = library.scan_folder(&empty_music_dir).unwrap();
+        assert_eq!(count, 0);
+        assert!(library.list_tracks().unwrap().is_empty());
+    }
+
+    #[test]
+    fn scan_folder_records_root_once_even_if_rescanned() {
+        let dir = tempfile::tempdir().unwrap();
+        let db_path = dir.path().join("library.sqlite3");
+        let library = Library::open(&db_path).unwrap();
+
+        let music_dir = dir.path().join("music");
+        std::fs::create_dir(&music_dir).unwrap();
+
+        library.scan_folder(&music_dir).unwrap();
+        library.scan_folder(&music_dir).unwrap();
+
+        let roots = library.list_scan_roots().unwrap();
+        assert_eq!(roots, vec![music_dir.to_string_lossy().into_owned()]);
+    }
 }
