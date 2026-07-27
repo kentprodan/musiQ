@@ -13,6 +13,10 @@ public sealed partial class LibraryPage : Page
     public LibraryPage()
     {
         InitializeComponent();
+        // Needed only so the ItemTemplate's per-row Play button can reach the
+        // page-level ViewModel via `{Binding ElementName=..., Path=DataContext.…}`
+        // — every other binding on this page uses x:Bind and ignores DataContext.
+        LibraryPageRoot.DataContext = ViewModel;
     }
 
     private async void ScanFolderButton_Click(object sender, RoutedEventArgs e)

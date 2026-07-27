@@ -53,4 +53,17 @@ public partial class LibraryViewModel : ObservableObject
             IsScanning = false;
         }
     }
+
+    [RelayCommand]
+    private async Task PlayTrackAsync(TrackItem track)
+    {
+        try
+        {
+            await LibraryService.Instance.PlayTrackAsync(track);
+        }
+        catch (MusiqException ex)
+        {
+            StatusMessage = $"Playback failed: {ex.Message}";
+        }
+    }
 }

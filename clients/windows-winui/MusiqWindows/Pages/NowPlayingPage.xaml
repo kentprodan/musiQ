@@ -14,6 +14,29 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Now Playing" />
-        <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.StatusMessage}" Opacity="0.7" VerticalAlignment="Top" />
+
+        <StackPanel Grid.Row="1" Spacing="20" VerticalAlignment="Top">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{x:Bind ViewModel.TrackTitle, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock Text="{x:Bind ViewModel.TrackArtist, Mode=OneWay}" Opacity="0.7" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button
+                    Command="{x:Bind ViewModel.PlayPauseCommand}"
+                    IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
+                    Width="48"
+                    HorizontalContentAlignment="Center">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}" />
+                </Button>
+                <Button
+                    Command="{x:Bind ViewModel.StopCommand}"
+                    IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
+                    Width="48"
+                    HorizontalContentAlignment="Center">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE71A;" />
+                </Button>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>

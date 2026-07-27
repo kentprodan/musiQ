@@ -12,7 +12,8 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 ## Core (Rust)
 
 - [ ] Tag *writing* / batch editing (Mp3Tag-parity: multi-file edit, rename patterns)
-- [ ] Audio playback engine (`rodio`/`symphonia`) + queue management
+- [x] Audio playback engine (`rodio`) — single-track play/pause/resume/stop/volume; queue management still open
+- [ ] Playback queue management (next/previous, shuffle, repeat)
 - [ ] Plex client (`musiq-net` equivalent)
 - [ ] Subsonic/Navidrome client
 - [ ] Sandboxed plugin host (WASM, capability-scoped manifests)
@@ -28,7 +29,8 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 
 ## Windows shell polish
 
-- [ ] Now Playing page: real transport controls once the audio engine exists (currently an honest "nothing playing yet" placeholder)
+- [x] Now Playing page: real transport controls (Play/Pause/Stop, current track title+artist) wired to the rodio playback engine
+- [ ] Now Playing: seek bar / elapsed-time display (rodio's `get_pos` is available, not wired up yet)
 - [ ] Sources page: support remote sources (Plex/Subsonic/Navidrome), not just local scanned folders
 - [ ] Title bar: interactive content (e.g. search box) needs `InputNonClientPointerSource` passthrough regions
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)

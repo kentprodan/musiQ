@@ -10,5 +10,6 @@ public sealed partial class NowPlayingPage : Page
     public NowPlayingPage()
     {
         InitializeComponent();
+        Unloaded += (_, _) => ViewModel.Detach();
     }
 }

@@ -7,6 +7,19 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Audio playback engine + real Now Playing controls
+
+### Added
+- **`core/musiq-core::Player`** — single-track playback via `rodio` 0.22 (`DeviceSinkBuilder::open_default_sink` + `Player::connect_new`): `play`/`pause`/`resume`/`stop`/`set_volume`/`is_paused`/`has_track`/`current_track_path`. New `MusiqError::Playback` variant.
+- **`ffi/musiq-uniffi::Player`** — exposes the above as a `uniffi::Object` (same `Mutex`-wrapping pattern as `Library`), regenerated into the C# bindings.
+- **WinUI3 shell**: `LibraryService` now owns a `Player` alongside `Library`, tracking the currently-playing `TrackItem` and raising a `CurrentTrackChanged` event.
+  - **Library page**: each row has a real Play button (Segoe Fluent Icons glyph, per official reference) wired to a `PlayTrackCommand`.
+  - **Now Playing page**: no longer a placeholder — shows the current track's title/artist and real Play/Pause (toggle, glyph-swapping) and Stop transport buttons, sourced from Microsoft's Segoe Fluent Icons documentation rather than memorized glyph codes.
+- Verified end-to-end on the Windows desktop via computer-use: scanned track played with audible output (confirmed via the taskbar audio indicator), Pause/Resume/Stop all correctly update the UI and the underlying player state.
+
+### Fixed
+- `LibraryPage`'s per-row Play button initially did nothing: its `{Binding ElementName=..., Path=DataContext.PlayTrackCommand}` resolved to a `null` `DataContext`, because this codebase binds exclusively through `x:Bind` (which doesn't use `DataContext`) and never set one. Fixed by explicitly setting `LibraryPageRoot.DataContext = ViewModel` in the page's constructor.
+
 ## 2026-07-27 — Phase 1 restart: Rust core + native Windows shell
 
 ### Added

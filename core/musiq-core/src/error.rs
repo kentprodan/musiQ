@@ -6,4 +6,6 @@ pub enum MusiqError {
     Db(#[from] rusqlite::Error),
     #[error("invalid path: {0}")]
     InvalidPath(String),
+    #[error("playback error: {0}")]
+    Playback(String),
 }

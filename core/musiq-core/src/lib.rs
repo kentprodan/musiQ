@@ -5,9 +5,11 @@
 
 mod db;
 mod error;
+mod player;
 mod scan;
 
 pub use error::MusiqError;
+pub use player::Player;
 
 use rusqlite::Connection;
 use std::path::Path;

@@ -39,6 +39,8 @@ pub enum MusiqError {
     Db { message: String },
     #[error("invalid path: {message}")]
     InvalidPath { message: String },
+    #[error("playback error: {message}")]
+    Playback { message: String },
 }
 
 impl From<CoreError> for MusiqError {
@@ -51,6 +53,7 @@ impl From<CoreError> for MusiqError {
                 message: e.to_string(),
             },
             CoreError::InvalidPath(p) => MusiqError::InvalidPath { message: p },
+            CoreError::Playback(p) => MusiqError::Playback { message: p },
         }
     }
 }
@@ -87,6 +90,58 @@ impl Library {
     pub fn list_scan_roots(&self) -> Result<Vec<String>, MusiqError> {
         let library = self.inner.lock().unwrap();
         Ok(library.list_scan_roots()?)
+    }
+}
+
+/// A handle to a single-track audio player. Wrapped in a `Mutex` for the same
+/// reason as `Library`: callers (C#/Swift/Kotlin) may hold this `Arc<Player>`
+/// across threads.
+#[derive(uniffi::Object)]
+pub struct Player {
+    inner: Mutex<musiq_core::Player>,
+}
+
+#[uniffi::export]
+impl Player {
+    #[uniffi::constructor]
+    pub fn new() -> Result<Arc<Self>, MusiqError> {
+        let inner = musiq_core::Player::new()?;
+        Ok(Arc::new(Self {
+            inner: Mutex::new(inner),
+        }))
+    }
+
+    pub fn play(&self, path: String) -> Result<(), MusiqError> {
+        let player = self.inner.lock().unwrap();
+        Ok(player.play(&PathBuf::from(path))?)
+    }
+
+    pub fn pause(&self) {
+        self.inner.lock().unwrap().pause();
+    }
+
+    pub fn resume(&self) {
+        self.inner.lock().unwrap().resume();
+    }
+
+    pub fn stop(&self) {
+        self.inner.lock().unwrap().stop();
+    }
+
+    pub fn set_volume(&self, volume: f32) {
+        self.inner.lock().unwrap().set_volume(volume);
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.inner.lock().unwrap().is_paused()
+    }
+
+    pub fn has_track(&self) -> bool {
+        self.inner.lock().unwrap().has_track()
+    }
+
+    pub fn current_track_path(&self) -> Option<String> {
+        self.inner.lock().unwrap().current_track_path()
     }
 }
 

@@ -9,7 +9,7 @@
     xmlns:viewmodels="using:MusiqWindows.ViewModels"
     mc:Ignorable="d">
 
-    <Grid Padding="24,16,24,16" RowSpacing="12">
+    <Grid x:Name="LibraryPageRoot" Padding="24,16,24,16" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -33,6 +33,7 @@
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Title" FontWeight="SemiBold" />
                         <TextBlock Grid.Column="1" Text="Artist" FontWeight="SemiBold" />
@@ -49,11 +50,19 @@
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{x:Bind Title}" />
                         <TextBlock Grid.Column="1" Text="{x:Bind Artist}" />
                         <TextBlock Grid.Column="2" Text="{x:Bind Album}" />
                         <TextBlock Grid.Column="3" Text="{x:Bind Duration}" />
+                        <Button
+                            Grid.Column="4"
+                            Padding="8,4"
+                            Command="{Binding DataContext.PlayTrackCommand, ElementName=LibraryPageRoot}"
+                            CommandParameter="{Binding}">
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE768;" FontSize="12" />
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
