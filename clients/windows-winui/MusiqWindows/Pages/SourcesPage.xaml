@@ -109,6 +109,103 @@
                         </ListView.ItemTemplate>
                     </ListView>
                 </StackPanel>
+
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Navidrome" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBox x:Name="NavidromeServerUrlBox" Header="Server URL" PlaceholderText="http://192.168.1.10:4533" Width="220" />
+                        <TextBox x:Name="NavidromeUsernameBox" Header="Username" Width="140" />
+                        <PasswordBox x:Name="NavidromePasswordBox" Header="Password" Width="160" />
+                        <Button
+                            x:Name="NavidromeConnectButton"
+                            Content="Connect"
+                            Click="NavidromeConnectButton_Click"
+                            VerticalAlignment="Bottom"
+                            IsEnabled="{x:Bind ViewModel.CanConnectToNavidrome, Mode=OneWay}" />
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsConnectingToNavidrome, Mode=OneWay}" Width="20" Height="20" VerticalAlignment="Bottom" />
+                    </StackPanel>
+                    <TextBlock Text="{x:Bind ViewModel.NavidromeStatusMessage, Mode=OneWay}" Opacity="0.7" />
+
+                    <TextBlock Text="Folders" Opacity="0.7" FontSize="12" />
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.NavidromeFolders}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Name}" Tag="{Binding}" Click="NavidromeFolderButton_Click" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="Albums" Opacity="0.7" FontSize="12" />
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.NavidromeAlbums}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Tag="{Binding}" Click="NavidromeAlbumButton_Click">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Text="{Binding Artist}" Opacity="0.7" FontSize="11" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ListView
+                        ItemsSource="{x:Bind ViewModel.NavidromeSongs}"
+                        SelectionMode="None"
+                        Height="300">
+                        <ListView.HeaderTemplate>
+                            <DataTemplate>
+                                <Grid Padding="12,4" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="48" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Title" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="Artist" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="2" Text="Album" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="3" Text="Duration" FontWeight="SemiBold" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.HeaderTemplate>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:NavidromeSongDisplay">
+                                <Grid Padding="12,8" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="48" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{x:Bind Title}" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind Artist}" />
+                                    <TextBlock Grid.Column="2" Text="{x:Bind Album}" />
+                                    <TextBlock Grid.Column="3" Text="{x:Bind Duration}" />
+                                    <Button
+                                        Grid.Column="4"
+                                        Padding="8,4"
+                                        Tag="{x:Bind Raw}"
+                                        Click="NavidromeSongPlayButton_Click">
+                                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE768;" FontSize="12" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

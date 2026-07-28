@@ -7,6 +7,18 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Real streaming for Plex, plus a Navidrome client
+
+### Added
+- **`core/musiq-core::streaming::HttpStreamReader`**: a shared `Read`+`Seek` adapter over HTTP, fetching bytes on demand via `Range` requests instead of downloading a file up front. Seeking is lazy — it only updates a position counter, and the next read reopens a range request only if that position doesn't match where the currently-open response left off, so ordinary sequential playback opens exactly one connection. `Player::play` now accepts either a local path or an `http(s)://` URL and dispatches accordingly, so remote tracks play through the exact same queue/pause/stop/shuffle/repeat machinery as local ones.
+- **Plex** now streams directly through `stream_url` — the temp-file download step from the previous pass is gone entirely (`PlexClient::download_track` removed, along with the now-unused `file_extension` field it existed for).
+- **`core/musiq-core::navidrome`**: a new client for Navidrome and any other Subsonic-API server. Token auth (`t = md5(password + salt)`, password never retained past hashing). Since Subsonic has no single "list every track" endpoint (unlike Plex), browsing goes music folder → albums → songs, mirroring how the API itself is organized. Streaming URLs use `format=raw` to disable server-side transcoding. New `MusiqError::Navidrome` variant. 5 unit tests against fixture JSON built from Subsonic's documented response shape (folder/album/song parsing, numeric-vs-string ID coercion, the `status: "ok"` envelope check Subsonic uses instead of HTTP status codes for auth failures).
+- **`ffi/musiq-uniffi`**: mirrors the updated `PlexTrack` (no `file_extension`) and the new `NavidromeClient`/`NavidromeFolder`/`NavidromeAlbum`/`NavidromeSong`, regenerated into the C# bindings.
+- **WinUI3 shell**: the Sources page gets a "Navidrome" section (server URL, username, password via `PasswordBox`) alongside Plex's, with folder and album buttons leading to a song list with Play. `TrackItem` gained a `FromNavidrome` factory alongside `FromPlex`.
+
+### Known limitation
+- **Neither Plex nor Navidrome has been verified against a live server** — none was available in this environment/session, same caveat as the original Plex pass. Only each client's failure path (unreachable host → timeout → clean error in the UI, no crash) was exercised end-to-end on the Windows desktop; local-library playback was re-verified working after the `Player::play` refactor. Treat both as implemented-but-unverified until tried against a real server.
+
 ## 2026-07-28 — Plex client
 
 ### Added

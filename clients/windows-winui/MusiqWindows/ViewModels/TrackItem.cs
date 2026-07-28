@@ -1,3 +1,4 @@
+using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
 using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 using UniffiTrack = uniffi.musiq_uniffi.Track;
 
@@ -5,9 +6,13 @@ namespace MusiqWindows.ViewModels;
 
 /// <summary>
 /// Flat, pre-formatted view of a track for display, whether it came from the
-/// local library (<see cref="UniffiTrack"/>) or a Plex server
-/// (<see cref="UniffiPlexTrack"/>). Exists so XAML never has to deal with
-/// nullable fields or raw seconds directly.
+/// local library (<see cref="UniffiTrack"/>) or a streaming source
+/// (<see cref="UniffiPlexTrack"/>, <see cref="UniffiNavidromeSong"/>). Exists
+/// so XAML never has to deal with nullable fields or raw seconds directly.
+///
+/// <c>Path</c> is whatever <c>Player.Play</c> accepts — a local filesystem
+/// path for library tracks, or an <c>http(s)://</c> stream URL for Plex/
+/// Navidrome (fetched on demand via HTTP range requests, not downloaded first).
 ///
 /// <c>Title</c>/<c>Artist</c>/<c>Album</c> are display strings with
 /// placeholder fallbacks baked in ("Unknown Artist" etc) — the tag-edit
@@ -43,10 +48,7 @@ public sealed record TrackItem(
             RawAlbum: track.Album);
     }
 
-    /// <param name="localPath">Where the track was (or will be) downloaded to —
-    /// Plex playback works by downloading to a temp file and playing that,
-    /// same as any other local file.</param>
-    internal static TrackItem FromPlex(UniffiPlexTrack track, string localPath)
+    internal static TrackItem FromPlex(UniffiPlexTrack track, string streamUrl)
     {
         return new TrackItem(
             Id: track.RatingKey,
@@ -54,10 +56,24 @@ public sealed record TrackItem(
             Artist: track.Artist ?? "Unknown Artist",
             Album: track.Album ?? "Unknown Album",
             Duration: FormatDuration(track.DurationSecs),
-            Path: localPath,
+            Path: streamUrl,
             RawTitle: track.Title,
             RawArtist: track.Artist,
             RawAlbum: track.Album);
+    }
+
+    internal static TrackItem FromNavidrome(UniffiNavidromeSong song)
+    {
+        return new TrackItem(
+            Id: song.Id,
+            Title: string.IsNullOrWhiteSpace(song.Title) ? "Untitled" : song.Title,
+            Artist: song.Artist ?? "Unknown Artist",
+            Album: song.Album ?? "Unknown Album",
+            Duration: FormatDuration(song.DurationSecs),
+            Path: song.StreamUrl,
+            RawTitle: song.Title,
+            RawArtist: song.Artist,
+            RawAlbum: song.Album);
     }
 
     private static string FormatDuration(uint? secs) =>

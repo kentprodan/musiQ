@@ -3,6 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusiqWindows.Services;
 using uniffi.musiq_uniffi;
+using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
+using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
+using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
 using UniffiPlexLibrary = uniffi.musiq_uniffi.PlexLibrary;
 using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 
@@ -19,6 +22,17 @@ internal sealed record PlexTrackDisplay(string Title, string Artist, string Albu
         Album: track.Album ?? "Unknown Album",
         Duration: track.DurationSecs is uint secs ? $"{secs / 60}:{secs % 60:D2}" : "--:--",
         Raw: track);
+}
+
+/// Same idea as <see cref="PlexTrackDisplay"/>, for a Navidrome/Subsonic song.
+internal sealed record NavidromeSongDisplay(string Title, string Artist, string Album, string Duration, UniffiNavidromeSong Raw)
+{
+    internal static NavidromeSongDisplay From(UniffiNavidromeSong song) => new(
+        Title: string.IsNullOrWhiteSpace(song.Title) ? "Untitled" : song.Title,
+        Artist: song.Artist ?? "Unknown Artist",
+        Album: song.Album ?? "Unknown Album",
+        Duration: song.DurationSecs is uint secs ? $"{secs / 60}:{secs % 60:D2}" : "--:--",
+        Raw: song);
 }
 
 internal partial class SourcesViewModel : ObservableObject
@@ -40,6 +54,21 @@ internal partial class SourcesViewModel : ObservableObject
     public ObservableCollection<UniffiPlexLibrary> PlexLibraries { get; } = new();
 
     public ObservableCollection<PlexTrackDisplay> PlexTracks { get; } = new();
+
+    [ObservableProperty]
+    private string _navidromeStatusMessage = "Not connected.";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanConnectToNavidrome))]
+    private bool _isConnectingToNavidrome;
+
+    public bool CanConnectToNavidrome => !IsConnectingToNavidrome;
+
+    public ObservableCollection<UniffiNavidromeFolder> NavidromeFolders { get; } = new();
+
+    public ObservableCollection<UniffiNavidromeAlbum> NavidromeAlbums { get; } = new();
+
+    public ObservableCollection<NavidromeSongDisplay> NavidromeSongs { get; } = new();
 
     public SourcesViewModel()
     {
@@ -132,13 +161,112 @@ internal partial class SourcesViewModel : ObservableObject
     {
         try
         {
-            PlexStatusMessage = $"Downloading \"{track.Title}\"…";
+            PlexStatusMessage = $"Playing \"{track.Title}\"…";
             await PlexService.Instance.PlayTrackAsync(track);
-            PlexStatusMessage = $"Playing \"{track.Title}\".";
         }
         catch (MusiqException ex)
         {
             PlexStatusMessage = $"Playback failed: {ex.Message}";
+        }
+    }
+
+    public async Task ConnectToNavidromeAsync(string baseUrl, string username, string password)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl) || string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            NavidromeStatusMessage = "Enter a server URL, username, and password.";
+            return;
+        }
+
+        IsConnectingToNavidrome = true;
+        NavidromeStatusMessage = "Connecting…";
+        NavidromeFolders.Clear();
+        NavidromeAlbums.Clear();
+        NavidromeSongs.Clear();
+
+        try
+        {
+            await NavidromeService.Instance.ConnectAsync(baseUrl, username, password);
+            var folders = await NavidromeService.Instance.ListMusicFoldersAsync();
+
+            foreach (var folder in folders)
+            {
+                NavidromeFolders.Add(folder);
+            }
+
+            if (folders.Count == 0)
+            {
+                NavidromeStatusMessage = "Connected, but no music folders were found.";
+            }
+            else
+            {
+                NavidromeStatusMessage = $"Connected — {folders.Count} music folder(s).";
+                await LoadNavidromeFolderAsync(folders[0]);
+            }
+        }
+        catch (MusiqException ex)
+        {
+            NavidromeStatusMessage = $"Connection failed: {ex.Message}";
+        }
+        finally
+        {
+            IsConnectingToNavidrome = false;
+        }
+    }
+
+    public async Task LoadNavidromeFolderAsync(UniffiNavidromeFolder folder)
+    {
+        NavidromeStatusMessage = $"Loading \"{folder.Name}\"…";
+        NavidromeSongs.Clear();
+        try
+        {
+            var albums = await NavidromeService.Instance.ListAlbumsAsync(folder.Id);
+
+            NavidromeAlbums.Clear();
+            foreach (var album in albums)
+            {
+                NavidromeAlbums.Add(album);
+            }
+
+            NavidromeStatusMessage = $"{folder.Name}: {albums.Count} album(s). Pick one to see its songs.";
+        }
+        catch (MusiqException ex)
+        {
+            NavidromeStatusMessage = $"Failed to load folder: {ex.Message}";
+        }
+    }
+
+    public async Task LoadNavidromeAlbumAsync(UniffiNavidromeAlbum album)
+    {
+        NavidromeStatusMessage = $"Loading \"{album.Name}\"…";
+        try
+        {
+            var songs = await NavidromeService.Instance.ListSongsAsync(album.Id);
+
+            NavidromeSongs.Clear();
+            foreach (var song in songs)
+            {
+                NavidromeSongs.Add(NavidromeSongDisplay.From(song));
+            }
+
+            NavidromeStatusMessage = $"{album.Name}: {songs.Count} song(s).";
+        }
+        catch (MusiqException ex)
+        {
+            NavidromeStatusMessage = $"Failed to load album: {ex.Message}";
+        }
+    }
+
+    public async Task PlayNavidromeSongAsync(UniffiNavidromeSong song)
+    {
+        try
+        {
+            NavidromeStatusMessage = $"Playing \"{song.Title}\"…";
+            await NavidromeService.Instance.PlayTrackAsync(song);
+        }
+        catch (MusiqException ex)
+        {
+            NavidromeStatusMessage = $"Playback failed: {ex.Message}";
         }
     }
 }

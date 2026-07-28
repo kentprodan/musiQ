@@ -14,4 +14,6 @@ pub enum MusiqError {
     Rename(String),
     #[error("plex error: {0}")]
     Plex(String),
+    #[error("navidrome error: {0}")]
+    Navidrome(String),
 }

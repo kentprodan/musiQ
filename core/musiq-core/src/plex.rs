@@ -6,13 +6,10 @@
 //! rather than strict structs, so one unexpected field doesn't break parsing
 //! of every other track.
 //!
-//! Playback works by downloading a track to a local temp file and handing
-//! that to the same `Player` used for local files — there's no true
-//! streaming (progressive download / range requests) yet, so playback
-//! starts only once the whole file has downloaded. Good enough for a first
-//! pass; real streaming is future work.
+//! Playback is real streaming: `stream_url` is handed to `Player`, which
+//! fetches it on demand via `crate::streaming::HttpStreamReader` rather than
+//! downloading the whole file first.
 
-use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use serde_json::Value;
@@ -31,9 +28,6 @@ pub struct PlexTrack {
     pub album: Option<String>,
     pub duration_secs: Option<u32>,
     pub stream_url: String,
-    /// File extension inferred from the Part's server-relative path (e.g.
-    /// "mp3"), so downloaded temp files keep a real extension.
-    pub file_extension: String,
 }
 
 pub struct PlexClient {
@@ -125,11 +119,6 @@ impl PlexClient {
             .as_array()?
             .first()?["key"]
             .as_str()?;
-        let file_extension = Path::new(part_key)
-            .extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("audio")
-            .to_string();
         let stream_url = format!("{}{}?X-Plex-Token={}", self.base_url, part_key, self.token);
 
         Some(PlexTrack {
@@ -139,30 +128,7 @@ impl PlexClient {
             album,
             duration_secs,
             stream_url,
-            file_extension,
         })
-    }
-
-    /// Downloads `track` into `dest_dir` (named after its rating key, so
-    /// repeat plays reuse the same file instead of re-downloading) and
-    /// returns the local path. Playback only starts once this completes —
-    /// there's no progressive streaming yet.
-    pub fn download_track(&self, track: &PlexTrack, dest_dir: &Path) -> Result<PathBuf, MusiqError> {
-        std::fs::create_dir_all(dest_dir)?;
-        let dest = dest_dir.join(format!("{}.{}", track.rating_key, track.file_extension));
-        if dest.exists() {
-            return Ok(dest);
-        }
-
-        let mut response = Self::agent()
-            .get(&track.stream_url)
-            .call()
-            .map_err(|e| MusiqError::Plex(e.to_string()))?;
-        let mut reader = response.body_mut().as_reader();
-        let mut file = std::fs::File::create(&dest)?;
-        std::io::copy(&mut reader, &mut file)?;
-
-        Ok(dest)
     }
 }
 
@@ -202,7 +168,6 @@ mod tests {
         assert_eq!(track.artist.as_deref(), Some("Artist Name"));
         assert_eq!(track.album.as_deref(), Some("Album Name"));
         assert_eq!(track.duration_secs, Some(185));
-        assert_eq!(track.file_extension, "mp3");
         assert_eq!(
             track.stream_url,
             "http://plex.local:32400/library/parts/46618/1389985872/file.mp3?X-Plex-Token=tok"

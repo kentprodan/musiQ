@@ -5,13 +5,16 @@
 
 mod db;
 mod error;
+mod navidrome;
 mod player;
 mod plex;
 mod rename;
 mod scan;
+mod streaming;
 mod tags;
 
 pub use error::MusiqError;
+pub use navidrome::{NavidromeAlbum, NavidromeClient, NavidromeFolder, NavidromeSong};
 pub use player::{Player, RepeatMode};
 pub use plex::{PlexClient, PlexLibrary, PlexTrack};
 

@@ -47,6 +47,8 @@ pub enum MusiqError {
     Rename { message: String },
     #[error("plex error: {message}")]
     Plex { message: String },
+    #[error("navidrome error: {message}")]
+    Navidrome { message: String },
 }
 
 impl From<CoreError> for MusiqError {
@@ -63,6 +65,7 @@ impl From<CoreError> for MusiqError {
             CoreError::Tag(p) => MusiqError::Tag { message: p },
             CoreError::Rename(p) => MusiqError::Rename { message: p },
             CoreError::Plex(p) => MusiqError::Plex { message: p },
+            CoreError::Navidrome(p) => MusiqError::Navidrome { message: p },
         }
     }
 }
@@ -174,9 +177,11 @@ impl Player {
         }))
     }
 
-    pub fn play(&self, path: String) -> Result<(), MusiqError> {
+    /// `source` is either a local file path or an `http(s)://` URL — a
+    /// remote track is streamed on demand rather than downloaded first.
+    pub fn play(&self, source: String) -> Result<(), MusiqError> {
         let player = self.inner.lock().unwrap();
-        Ok(player.play(&PathBuf::from(path))?)
+        Ok(player.play(&source)?)
     }
 
     pub fn pause(&self) {
@@ -274,7 +279,6 @@ pub struct PlexTrack {
     pub album: Option<String>,
     pub duration_secs: Option<u32>,
     pub stream_url: String,
-    pub file_extension: String,
 }
 
 impl From<musiq_core::PlexTrack> for PlexTrack {
@@ -286,21 +290,6 @@ impl From<musiq_core::PlexTrack> for PlexTrack {
             album: t.album,
             duration_secs: t.duration_secs,
             stream_url: t.stream_url,
-            file_extension: t.file_extension,
-        }
-    }
-}
-
-impl From<PlexTrack> for musiq_core::PlexTrack {
-    fn from(t: PlexTrack) -> Self {
-        musiq_core::PlexTrack {
-            rating_key: t.rating_key,
-            title: t.title,
-            artist: t.artist,
-            album: t.album,
-            duration_secs: t.duration_secs,
-            stream_url: t.stream_url,
-            file_extension: t.file_extension,
         }
     }
 }
@@ -343,12 +332,105 @@ impl PlexClient {
             .map(PlexTrack::from)
             .collect())
     }
+}
 
-    /// Downloads `track` into `dest_dir`, returning the local file path.
-    pub fn download_track(&self, track: PlexTrack, dest_dir: String) -> Result<String, MusiqError> {
-        let core_track: musiq_core::PlexTrack = track.into();
-        let path = self.inner.download_track(&core_track, &PathBuf::from(dest_dir))?;
-        Ok(path.to_string_lossy().into_owned())
+#[derive(uniffi::Record)]
+pub struct NavidromeFolder {
+    pub id: String,
+    pub name: String,
+}
+
+impl From<musiq_core::NavidromeFolder> for NavidromeFolder {
+    fn from(f: musiq_core::NavidromeFolder) -> Self {
+        NavidromeFolder { id: f.id, name: f.name }
+    }
+}
+
+#[derive(uniffi::Record)]
+pub struct NavidromeAlbum {
+    pub id: String,
+    pub name: String,
+    pub artist: Option<String>,
+}
+
+impl From<musiq_core::NavidromeAlbum> for NavidromeAlbum {
+    fn from(a: musiq_core::NavidromeAlbum) -> Self {
+        NavidromeAlbum {
+            id: a.id,
+            name: a.name,
+            artist: a.artist,
+        }
+    }
+}
+
+#[derive(uniffi::Record)]
+pub struct NavidromeSong {
+    pub id: String,
+    pub title: String,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub duration_secs: Option<u32>,
+    pub stream_url: String,
+}
+
+impl From<musiq_core::NavidromeSong> for NavidromeSong {
+    fn from(s: musiq_core::NavidromeSong) -> Self {
+        NavidromeSong {
+            id: s.id,
+            title: s.title,
+            artist: s.artist,
+            album: s.album,
+            duration_secs: s.duration_secs,
+            stream_url: s.stream_url,
+        }
+    }
+}
+
+/// A connection to a Navidrome (or other Subsonic-API-compatible) server.
+/// Like `PlexClient`, holds no interior mutability, so no `Mutex` needed.
+#[derive(uniffi::Object)]
+pub struct NavidromeClient {
+    inner: musiq_core::NavidromeClient,
+}
+
+#[uniffi::export]
+impl NavidromeClient {
+    #[uniffi::constructor]
+    pub fn new(base_url: String, username: String, password: String) -> Arc<Self> {
+        Arc::new(Self {
+            inner: musiq_core::NavidromeClient::new(base_url, username, password),
+        })
+    }
+
+    pub fn test_connection(&self) -> Result<(), MusiqError> {
+        Ok(self.inner.test_connection()?)
+    }
+
+    pub fn list_music_folders(&self) -> Result<Vec<NavidromeFolder>, MusiqError> {
+        Ok(self
+            .inner
+            .list_music_folders()?
+            .into_iter()
+            .map(NavidromeFolder::from)
+            .collect())
+    }
+
+    pub fn list_albums(&self, folder_id: String) -> Result<Vec<NavidromeAlbum>, MusiqError> {
+        Ok(self
+            .inner
+            .list_albums(&folder_id)?
+            .into_iter()
+            .map(NavidromeAlbum::from)
+            .collect())
+    }
+
+    pub fn list_songs(&self, album_id: String) -> Result<Vec<NavidromeSong>, MusiqError> {
+        Ok(self
+            .inner
+            .list_songs(&album_id)?
+            .into_iter()
+            .map(NavidromeSong::from)
+            .collect())
     }
 }
 

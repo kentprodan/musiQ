@@ -6,13 +6,13 @@
 
 use std::fs::File;
 use std::io::BufReader;
-use std::path::Path;
 use std::sync::Mutex;
 
 use rand::seq::SliceRandom;
 use rodio::{Decoder, DeviceSinkBuilder, MixerDeviceSink, Player as RodioPlayer};
 
 use crate::error::MusiqError;
+use crate::streaming::HttpStreamReader;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RepeatMode {
@@ -93,18 +93,30 @@ impl Player {
         })
     }
 
-    /// Stops whatever is playing and starts `path` from the beginning. Does
-    /// not touch the queue — prefer `set_queue`/`next`/`previous` from UI
-    /// code so polling-based auto-advance and shuffle/repeat stay coherent.
-    pub fn play(&self, path: &Path) -> Result<(), MusiqError> {
-        let file = File::open(path)?;
-        let decoder = Decoder::try_from(BufReader::new(file))
-            .map_err(|e| MusiqError::Playback(e.to_string()))?;
+    /// Stops whatever is playing and starts `source` from the beginning —
+    /// either a local file path, or an `http(s)://` URL, streamed on demand
+    /// via range requests rather than downloaded up front. Does not touch
+    /// the queue — prefer `set_queue`/`next`/`previous` from UI code so
+    /// polling-based auto-advance and shuffle/repeat stay coherent.
+    pub fn play(&self, source: &str) -> Result<(), MusiqError> {
+        if source.starts_with("http://") || source.starts_with("https://") {
+            let reader =
+                HttpStreamReader::open(source).map_err(|e| MusiqError::Playback(e.to_string()))?;
+            let decoder =
+                Decoder::new(reader).map_err(|e| MusiqError::Playback(e.to_string()))?;
+            self.inner.clear();
+            self.inner.append(decoder);
+            self.inner.play();
+        } else {
+            let file = File::open(source)?;
+            let decoder = Decoder::try_from(BufReader::new(file))
+                .map_err(|e| MusiqError::Playback(e.to_string()))?;
+            self.inner.clear();
+            self.inner.append(decoder);
+            self.inner.play();
+        }
 
-        self.inner.clear();
-        self.inner.append(decoder);
-        self.inner.play();
-        *self.current_path.lock().unwrap() = Some(path.to_string_lossy().into_owned());
+        *self.current_path.lock().unwrap() = Some(source.to_string());
         Ok(())
     }
 
@@ -162,7 +174,7 @@ impl Player {
         }
         let path = tracks[start_index].clone();
         self.queue.lock().unwrap().set_tracks(tracks, start_index);
-        self.play(Path::new(&path))
+        self.play(&path)
     }
 
     /// Manually advances to the next track. Returns `false` (and leaves
@@ -208,7 +220,7 @@ impl Player {
             queue.tracks[track_index].clone()
         };
 
-        self.play(Path::new(&path))?;
+        self.play(&path)?;
         Ok(true)
     }
 
@@ -233,7 +245,7 @@ impl Player {
         };
 
         if let Some(path) = repeat_current {
-            self.play(Path::new(&path))?;
+            self.play(&path)?;
             return Ok(true);
         }
 
