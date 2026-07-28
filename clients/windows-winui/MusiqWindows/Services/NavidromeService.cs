@@ -1,5 +1,6 @@
 using MusiqWindows.ViewModels;
 using System.Linq;
+using uniffi.musiq_uniffi;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
 using UniffiNavidromeArtist = uniffi.musiq_uniffi.NavidromeArtist;
 using UniffiNavidromeClient = uniffi.musiq_uniffi.NavidromeClient;
@@ -44,6 +45,28 @@ internal sealed class NavidromeService
     {
         _client = null;
         CredentialStore.ClearNavidrome();
+    }
+
+    /// Restores a previous connection from <see cref="CredentialStore"/> —
+    /// called once at app startup so a server that was already connected
+    /// shows up as available right away instead of only after a manual
+    /// visit to Settings > Library sources. Best-effort: if the server is
+    /// now unreachable or the credentials were rejected, this just leaves
+    /// the service disconnected, same as if it had never been called.
+    public async Task TryAutoConnectAsync()
+    {
+        if (CredentialStore.LoadNavidrome() is not (string baseUrl, string username, string password))
+        {
+            return;
+        }
+
+        try
+        {
+            await ConnectAsync(baseUrl, username, password);
+        }
+        catch (MusiqException)
+        {
+        }
     }
 
     public Task<IReadOnlyList<UniffiNavidromeFolder>> ListMusicFoldersAsync() =>

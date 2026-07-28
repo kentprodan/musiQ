@@ -63,6 +63,11 @@ internal sealed class LibraryService
     public Task<IReadOnlyList<string>> ListScanRootsAsync() =>
         Task.Run(() => (IReadOnlyList<string>)_library.ListScanRoots());
 
+    /// Forgets `folderPath` as a scan root and removes every track under it
+    /// from the library. The files themselves are left untouched on disk.
+    public Task<uint> RemoveScanRootAsync(string folderPath) =>
+        Task.Run(() => _library.RemoveScanRoot(folderPath));
+
     /// A file path to `trackId`'s embedded cover art, or `null` if the file
     /// has no embedded picture.
     public Task<string?> GetTrackArtPathAsync(string trackId) =>

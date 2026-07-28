@@ -1,5 +1,6 @@
 using MusiqWindows.ViewModels;
 using System.Linq;
+using uniffi.musiq_uniffi;
 using UniffiPlexAlbum = uniffi.musiq_uniffi.PlexAlbum;
 using UniffiPlexArtist = uniffi.musiq_uniffi.PlexArtist;
 using UniffiPlexClient = uniffi.musiq_uniffi.PlexClient;
@@ -51,6 +52,28 @@ internal sealed class PlexService
     {
         _client = null;
         CredentialStore.ClearPlex();
+    }
+
+    /// Restores a previous connection from <see cref="CredentialStore"/> —
+    /// called once at app startup so a server that was already connected
+    /// shows up as available right away instead of only after a manual
+    /// visit to Settings > Library sources. Best-effort: if the server is
+    /// now unreachable or the token was revoked, this just leaves the
+    /// service disconnected, same as if it had never been called.
+    public async Task TryAutoConnectAsync()
+    {
+        if (CredentialStore.LoadPlex() is not (string baseUrl, string token))
+        {
+            return;
+        }
+
+        try
+        {
+            await ConnectAsync(baseUrl, token);
+        }
+        catch (MusiqException)
+        {
+        }
     }
 
     public Task<IReadOnlyList<UniffiPlexLibrary>> ListMusicLibrariesAsync() =>

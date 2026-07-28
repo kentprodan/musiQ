@@ -104,6 +104,13 @@ impl Library {
         Ok(library.list_scan_roots()?)
     }
 
+    /// Forgets `folder` as a scan root and removes every track under it from
+    /// the library (the files themselves are untouched on disk).
+    pub fn remove_scan_root(&self, folder: String) -> Result<u32, MusiqError> {
+        let library = self.inner.lock().unwrap();
+        Ok(library.remove_scan_root(&folder)?)
+    }
+
     /// A file path to `track_id`'s embedded cover art (extracted from the
     /// audio file and cached on first request), or `None` if it has no
     /// embedded picture.

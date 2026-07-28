@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MusiqWindows.Pages.SettingsLibrariesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MusiqWindows.Pages"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="4" Padding="24,16,0,0" VerticalAlignment="Center">
+            <HyperlinkButton Padding="0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" ElementSoundMode="FocusOnly" Click="BackToSettingsHome_Click">
+                <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}" />
+            </HyperlinkButton>
+            <TextBlock Text="&gt;" Style="{StaticResource TitleTextBlockStyle}" Opacity="0.6" VerticalAlignment="Center" />
+            <TextBlock x:Name="SectionLabelText" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1">
+            <Grid>
+                <StackPanel
+                    HorizontalAlignment="Stretch"
+                    MaxWidth="1000"
+                    Padding="24,0,24,24"
+                    Spacing="{StaticResource SettingsCardSpacing}">
+                    <controls:SettingsExpander
+                        Header="Music library locations"
+                        Description="Local music folders scanned into your library."
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE8DA;}"
+                        ItemsSource="{x:Bind ViewModel.ScannedFolders}">
+                        <Button x:Name="AddFolderButton" Content="Add folder" Click="AddFolderButton_Click" />
+                        <controls:SettingsExpander.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <controls:SettingsCard Header="{x:Bind}">
+                                    <Button Tag="{x:Bind}" Click="RemoveFolderButton_Click" ToolTipService.ToolTip="Remove this folder">
+                                        <FontIcon Glyph="&#xE711;" FontSize="12" />
+                                    </Button>
+                                </controls:SettingsCard>
+                            </DataTemplate>
+                        </controls:SettingsExpander.ItemTemplate>
+                    </controls:SettingsExpander>
+
+                    <TextBlock Text="{x:Bind ViewModel.LibraryStatusMessage, Mode=OneWay}" Opacity="0.7" />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>

@@ -43,6 +43,12 @@ public partial class App : Application
         _window = new MainWindow();
         MainAppWindow = _window;
         _window.Activate();
+
+        // Fire-and-forget: a previously-connected Plex/Navidrome server
+        // should show up as selectable in the title bar right away, not
+        // only after a manual visit to Settings > Library sources.
+        _ = Services.PlexService.Instance.TryAutoConnectAsync();
+        _ = Services.NavidromeService.Instance.TryAutoConnectAsync();
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)

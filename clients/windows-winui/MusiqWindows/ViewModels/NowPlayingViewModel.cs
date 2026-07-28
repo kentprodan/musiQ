@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using MusiqWindows.Services;
 using UniffiRepeatMode = uniffi.musiq_uniffi.RepeatMode;
 
@@ -152,6 +153,11 @@ public partial class NowPlayingViewModel : ObservableObject
 
     public async Task PlayQueueItemAsync(TrackItem track)
     {
+        // ListView items don't get an automatic control sound the way a
+        // Button does, and this is an arbitrary jump rather than a
+        // sequential skip, so Invoke (not MoveNext/MovePrevious) is the
+        // matching sound per Microsoft's sound guidance.
+        ElementSoundPlayer.Play(ElementSoundKind.Invoke);
         await LibraryService.Instance.PlayQueueItemAsync(track);
         IsPaused = false;
     }
@@ -188,9 +194,14 @@ public partial class NowPlayingViewModel : ObservableObject
         await LibraryService.Instance.StopAsync();
     }
 
+    // MoveNext/MovePrevious (rather than the buttons' own default Invoke
+    // sound, which is switched off in XAML) since skipping through the queue
+    // is exactly the "bidirectional navigation within a page" case Microsoft's
+    // sound guidance calls out for those two sounds specifically.
     [RelayCommand]
     private async Task NextAsync()
     {
+        ElementSoundPlayer.Play(ElementSoundKind.MoveNext);
         await LibraryService.Instance.NextAsync();
         IsPaused = false;
     }
@@ -198,6 +209,7 @@ public partial class NowPlayingViewModel : ObservableObject
     [RelayCommand]
     private async Task PreviousAsync()
     {
+        ElementSoundPlayer.Play(ElementSoundKind.MovePrevious);
         await LibraryService.Instance.PreviousAsync();
         IsPaused = false;
     }

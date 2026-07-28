@@ -214,6 +214,37 @@ impl Library {
         }
         Ok(roots)
     }
+
+    /// Forgets `folder` as a scan root and deletes every track whose path
+    /// falls under it. Filtering in Rust (rather than a SQL `LIKE` prefix
+    /// match) sidesteps having to escape `%`/`_`/`\` wildcard characters
+    /// that can legitimately appear in a real file path.
+    pub fn remove_scan_root(&self, folder: &str) -> Result<u32, MusiqError> {
+        let prefix = if folder.ends_with(std::path::MAIN_SEPARATOR) {
+            folder.to_string()
+        } else {
+            format!("{folder}{}", std::path::MAIN_SEPARATOR)
+        };
+
+        let mut stmt = self.conn.prepare("SELECT id, path FROM tracks")?;
+        let rows = stmt.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)))?;
+        let mut ids_to_remove = Vec::new();
+        for row in rows {
+            let (id, path) = row?;
+            if path == folder || path.starts_with(&prefix) {
+                ids_to_remove.push(id);
+            }
+        }
+        drop(stmt);
+
+        for id in &ids_to_remove {
+            self.conn.execute("DELETE FROM tracks WHERE id = ?1", rusqlite::params![id])?;
+        }
+        self.conn
+            .execute("DELETE FROM scan_roots WHERE path = ?1", rusqlite::params![folder])?;
+
+        Ok(ids_to_remove.len() as u32)
+    }
 }
 
 #[cfg(test)]
@@ -272,5 +303,26 @@ mod tests {
 
         let roots = library.list_scan_roots().unwrap();
         assert_eq!(roots, vec![music_dir.to_string_lossy().into_owned()]);
+    }
+
+    #[test]
+    fn remove_scan_root_forgets_root_and_its_tracks_only() {
+        let dir = tempfile::tempdir().unwrap();
+        let db_path = dir.path().join("library.sqlite3");
+        let library = Library::open(&db_path).unwrap();
+
+        let removed_dir = dir.path().join("removed");
+        let kept_dir = dir.path().join("kept");
+        std::fs::create_dir(&removed_dir).unwrap();
+        std::fs::create_dir(&kept_dir).unwrap();
+        library.scan_folder(&removed_dir).unwrap();
+        library.scan_folder(&kept_dir).unwrap();
+
+        library
+            .remove_scan_root(&removed_dir.to_string_lossy())
+            .unwrap();
+
+        let roots = library.list_scan_roots().unwrap();
+        assert_eq!(roots, vec![kept_dir.to_string_lossy().into_owned()]);
     }
 }

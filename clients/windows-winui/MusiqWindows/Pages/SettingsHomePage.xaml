@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MusiqWindows.Pages.SettingsHomePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:MusiqWindows.Pages"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <!-- The outer Grid works around a known ItemsRepeater/SettingsExpander
+             sizing bug when a MaxWidth'd StackPanel is its direct parent —
+             per the Windows Community Toolkit's own SettingsExpander docs. -->
+        <Grid>
+            <StackPanel
+                HorizontalAlignment="Stretch"
+                MaxWidth="1000"
+                Padding="24,16,24,24"
+                Spacing="{StaticResource SettingsCardSpacing}">
+                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" Margin="1,0,0,6" />
+
+                <controls:SettingsCard
+                    Header="Appearance &amp; behavior"
+                    Description="Theme, sound"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
+                    IsClickEnabled="True"
+                    Tag="appearance"
+                    Click="SectionCard_Click" />
+                <controls:SettingsCard
+                    Header="Libraries"
+                    Description="Local music folders scanned into your library"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE8DA;}"
+                    IsClickEnabled="True"
+                    Tag="libraries"
+                    Click="SectionCard_Click" />
+                <controls:SettingsCard
+                    Header="Library sources"
+                    Description="Plex and Navidrome connections"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE774;}"
+                    IsClickEnabled="True"
+                    Tag="sources"
+                    Click="SectionCard_Click" />
+                <controls:SettingsCard
+                    Header="App data"
+                    Description="Data folder, export/import settings"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE8B7;}"
+                    IsClickEnabled="True"
+                    Tag="appdata"
+                    Click="SectionCard_Click" />
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="About" />
+                <controls:SettingsExpander
+                    Header="musiQ"
+                    Description="{x:Bind ViewModel.AppVersion}"
+                    HeaderIcon="{ui:BitmapIcon Source=ms-appx:///Assets/Square44x44Logo.scale-200.png}" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

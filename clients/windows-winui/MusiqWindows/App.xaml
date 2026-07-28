@@ -8,9 +8,21 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Needed specifically for SettingsExpander's ItemsSource/ItemTemplate
+                     usage (the Libraries page's folder list), per the Community Toolkit's
+                     own sample for that scenario. -->
+                <ResourceDictionary Source="ms-appx:///CommunityToolkit.WinUI.Controls.SettingsControls/SettingsExpander/SettingsExpander.xaml" />
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
-            <!-- Other app resources here -->
+
+            <!-- Shared Settings-page resources, matching the Windows Community
+                 Toolkit's own recommended "Settings page example" exactly. -->
+            <x:Double x:Key="SettingsCardSpacing">4</x:Double>
+            <Style x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
+                <Style.Setters>
+                    <Setter Property="Margin" Value="1,30,0,6" />
+                </Style.Setters>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

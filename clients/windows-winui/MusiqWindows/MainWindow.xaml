@@ -31,29 +31,15 @@
                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
             </TitleBar.IconSource>
             <TitleBar.Content>
-                <StackPanel
-                    x:Name="SearchPanel"
-                    Orientation="Horizontal"
-                    Spacing="4"
+                <AutoSuggestBox
+                    x:Name="LibrarySearchBox"
+                    MinWidth="200"
                     VerticalAlignment="Center"
+                    PlaceholderText="Search Local"
+                    TextChanged="LibrarySearchBox_TextChanged"
                     Visibility="Collapsed">
-                    <AutoSuggestBox
-                        x:Name="LibrarySearchBox"
-                        MinWidth="200"
-                        VerticalAlignment="Center"
-                        PlaceholderText="Search library"
-                        TextChanged="LibrarySearchBox_TextChanged" />
-                    <SplitButton
-                        x:Name="SearchScopeButton"
-                        Padding="8,4"
-                        MinWidth="0"
-                        Height="32"
-                        VerticalAlignment="Center"
-                        ToolTipService.ToolTip="Search scope"
-                        Click="SearchScopeButton_Click"
-                        PointerEntered="SearchScopeButton_PointerEntered"
-                        PointerExited="SearchScopeButton_PointerExited">
-                        <AnimatedIcon x:Name="SearchScopeIcon" Width="16" Height="16">
+                    <AutoSuggestBox.QueryIcon>
+                        <AnimatedIcon>
                             <AnimatedIcon.Source>
                                 <animatedvisuals:AnimatedFindVisualSource />
                             </AnimatedIcon.Source>
@@ -61,12 +47,28 @@
                                 <SymbolIconSource Symbol="Find" />
                             </AnimatedIcon.FallbackIconSource>
                         </AnimatedIcon>
-                        <SplitButton.Flyout>
-                            <MenuFlyout x:Name="SearchScopeFlyout" Placement="BottomEdgeAlignedRight" Opening="SearchScopeFlyout_Opening" />
-                        </SplitButton.Flyout>
-                    </SplitButton>
-                </StackPanel>
+                    </AutoSuggestBox.QueryIcon>
+                </AutoSuggestBox>
             </TitleBar.Content>
+            <TitleBar.RightHeader>
+                <SplitButton
+                    x:Name="LibrarySourceButton"
+                    Padding="8,4"
+                    MinWidth="0"
+                    Height="32"
+                    VerticalAlignment="Center"
+                    ToolTipService.ToolTip="Current library"
+                    Click="LibrarySourceButton_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Image x:Name="LibrarySourceImage" Width="16" Height="16" Visibility="Collapsed" />
+                        <FontIcon x:Name="LibrarySourceFontIcon" Width="16" Height="16" FontSize="16" Glyph="&#xE8D6;" />
+                        <TextBlock x:Name="LibrarySourceText" Text="Local" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <SplitButton.Flyout>
+                        <MenuFlyout x:Name="LibrarySourceFlyout" Placement="BottomEdgeAlignedRight" Opening="LibrarySourceFlyout_Opening" />
+                    </SplitButton.Flyout>
+                </SplitButton>
+            </TitleBar.RightHeader>
         </TitleBar>
 
         <NavigationView
@@ -75,13 +77,50 @@
             IsBackButtonVisible="Collapsed"
             IsPaneToggleButtonVisible="False"
             SelectionChanged="NavView_SelectionChanged">
-            <NavigationView.MenuItems>
+            <!--
+              MenuItems is intentionally left empty here — it's rebuilt in
+              code (RebuildLibraryMenuItems) every time the selected library
+              source (Local/Navidrome/Plex) changes, since the set of
+              sections shown depends on that.
+            -->
+            <!--
+              Native pane search slot (renders above the menu items per
+              Microsoft's own NavigationView docs) — a global search, distinct
+              from the title bar's box which is scoped to whatever section is
+              currently open. Submitting a query here always jumps to Local
+              Tracks and filters there, since that's the only section with
+              real searchable data today.
+            -->
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox
+                    x:Name="GlobalSearchBox"
+                    PlaceholderText="Search everywhere"
+                    QuerySubmitted="GlobalSearchBox_QuerySubmitted">
+                    <AutoSuggestBox.QueryIcon>
+                        <AnimatedIcon>
+                            <AnimatedIcon.Source>
+                                <animatedvisuals:AnimatedFindVisualSource />
+                            </AnimatedIcon.Source>
+                            <AnimatedIcon.FallbackIconSource>
+                                <SymbolIconSource Symbol="Find" />
+                            </AnimatedIcon.FallbackIconSource>
+                        </AnimatedIcon>
+                    </AutoSuggestBox.QueryIcon>
+                </AutoSuggestBox>
+            </NavigationView.AutoSuggestBox>
+            <NavigationView.FooterMenuItems>
                 <NavigationViewItem
-                    Content="Library"
-                    IsSelected="True"
-                    Tag="library">
+                    x:Name="OfflineNavItem"
+                    Content="Offline"
+                    Tag="offline"
+                    Visibility="Collapsed">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE93C;" />
+                        <FontIcon Glyph="&#xE709;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Downloads" Tag="downloads">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE896;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Now Playing" Tag="nowplaying">
@@ -89,12 +128,7 @@
                         <FontIcon Glyph="&#xE8D6;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Sources" Tag="sources">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8B7;" />
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
+            </NavigationView.FooterMenuItems>
             <Frame x:Name="NavFrame" />
         </NavigationView>
     </Grid>

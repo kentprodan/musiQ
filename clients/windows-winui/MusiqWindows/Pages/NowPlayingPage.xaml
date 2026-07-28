@@ -50,7 +50,8 @@
                     Command="{x:Bind ViewModel.PreviousCommand}"
                     IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
                     Width="40"
-                    HorizontalContentAlignment="Center">
+                    HorizontalContentAlignment="Center"
+                    ElementSoundMode="FocusOnly">
                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE892;" FontSize="14" />
                 </Button>
                 <Button
@@ -64,7 +65,8 @@
                     Command="{x:Bind ViewModel.NextCommand}"
                     IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
                     Width="40"
-                    HorizontalContentAlignment="Center">
+                    HorizontalContentAlignment="Center"
+                    ElementSoundMode="FocusOnly">
                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE893;" FontSize="14" />
                 </Button>
                 <Button
