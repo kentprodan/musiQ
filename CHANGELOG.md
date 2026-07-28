@@ -7,6 +7,16 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Plex/Navidrome: remember the connection across restarts
+
+### Added
+- **WinUI3 shell**: a successful Plex or Navidrome connection is now saved to Windows' per-user Credential Locker (`Windows.Security.Credentials.PasswordVault`, the standard WinRT API for this — confirmed against Microsoft Learn before implementing) and restored automatically the next time the app launches, pre-filling the server URL/token/username/password fields and reconnecting without any typing. A new "Forget" button next to each Connect button clears the saved credential and disconnects.
+- New `Services/CredentialStore.cs`: a small wrapper around `PasswordVault` (`Add`/`FindAllByResource`/`Remove`) shared by both Plex and Navidrome. Navidrome's base URL and username are packed into the vault's single `UserName` field (there's no separate field for it) using a `` control-character separator that can't appear in either value.
+- **Verified end-to-end** using a throwaway local HTTP stub standing in for a real Plex/Navidrome server (this repo has no live server to test against): connected both services, confirmed the "Forget" button appeared; fully restarted the app and confirmed both reconnected automatically with every field pre-filled; clicked "Forget" on Plex and restarted again, confirming Plex correctly stayed disconnected while Navidrome (not forgotten) still auto-reconnected. This proves the save/load/auto-connect/forget cycle works against the real Credential Locker, independent of the Plex/Navidrome network-protocol code (which still needs the user's own server to verify, per the existing caveat below).
+
+### Decided against
+- The TODO item to periodically regenerate Navidrome's salt/token pair: Subsonic tokens don't expire, so "regenerating" one would only be possible by keeping the plaintext password resident in memory for the app's whole lifetime — a real security tradeoff for no practical benefit. Skipped.
+
 ## 2026-07-28 — Plex/Navidrome: queue support
 
 ### Added

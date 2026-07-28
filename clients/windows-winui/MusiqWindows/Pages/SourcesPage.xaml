@@ -45,6 +45,11 @@
                             Click="PlexConnectButton_Click"
                             VerticalAlignment="Bottom"
                             IsEnabled="{x:Bind ViewModel.CanConnectToPlex, Mode=OneWay}" />
+                        <Button
+                            Content="Forget"
+                            Command="{x:Bind ViewModel.DisconnectPlexCommand}"
+                            VerticalAlignment="Bottom"
+                            Visibility="{x:Bind ViewModel.IsPlexConnected, Mode=OneWay}" />
                         <ProgressRing IsActive="{x:Bind ViewModel.IsConnectingToPlex, Mode=OneWay}" Width="20" Height="20" VerticalAlignment="Bottom" />
                     </StackPanel>
                     <TextBlock Text="{x:Bind ViewModel.PlexStatusMessage, Mode=OneWay}" Opacity="0.7" />
@@ -122,6 +127,11 @@
                             Click="NavidromeConnectButton_Click"
                             VerticalAlignment="Bottom"
                             IsEnabled="{x:Bind ViewModel.CanConnectToNavidrome, Mode=OneWay}" />
+                        <Button
+                            Content="Forget"
+                            Command="{x:Bind ViewModel.DisconnectNavidromeCommand}"
+                            VerticalAlignment="Bottom"
+                            Visibility="{x:Bind ViewModel.IsNavidromeConnected, Mode=OneWay}" />
                         <ProgressRing IsActive="{x:Bind ViewModel.IsConnectingToNavidrome, Mode=OneWay}" Width="20" Height="20" VerticalAlignment="Bottom" />
                     </StackPanel>
                     <TextBlock Text="{x:Bind ViewModel.NavidromeStatusMessage, Mode=OneWay}" Opacity="0.7" />

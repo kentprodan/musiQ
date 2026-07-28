@@ -20,7 +20,7 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] Shared `HttpStreamReader` (`Read`+`Seek` over HTTP ranges) so both Plex and Navidrome feed rodio's decoder directly, matching local-file playback — **neither client has been verified against a live server** (none available in this environment); only each one's error path (unreachable host, timeout) was exercised end-to-end. JSON-parsing logic has unit-test coverage against each API's documented response shape.
 - [ ] **User to verify Plex + Navidrome against real servers** (connect, browse, play, confirm streaming actually starts before full download) — untested live as of 2026-07-28, see note above
 - [x] Plex/Navidrome: queue support — playing a track queues the rest of the currently-shown library/album list around it (Next/Previous/shuffle/repeat all work), since `Player::set_queue` already treated paths generically and needed no core changes — **not yet verified against a live server**, see the verification item above
-- [ ] Navidrome: regenerate the salt/token pair periodically instead of once per connection (a minor, low-risk simplification for a self-hosted single-session client)
+- [x] ~~Navidrome: regenerate the salt/token pair periodically~~ — decided against it: Subsonic tokens don't expire, so the only way to "regenerate" would be retaining the plaintext password in memory for the app's lifetime, a real security tradeoff for no practical benefit
 - [ ] Sandboxed plugin host (WASM, capability-scoped manifests)
 - [ ] Extend UniFFI contract as each of the above lands, regenerate Swift/Kotlin bindings alongside C#
 
@@ -40,6 +40,7 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] Now Playing: seek bar / elapsed-time display — real drag-to-seek (`rodio::Player::try_seek`), not just read-only progress
 - [x] Sources page: Plex connection (server URL + token, library list, track list with Play)
 - [x] Sources page: Navidrome connection (server URL + username/password, folder → album → song browsing, Play)
+- [x] Plex/Navidrome: remember the connection (server URL + token/username/password) in Windows' Credential Locker (`PasswordVault`) and reconnect automatically on launch, with a "Forget" button to clear it
 - [ ] Title bar: interactive content (e.g. search box) needs `InputNonClientPointerSource` passthrough regions
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)
 - [x] Tag editing UI: per-track edit dialog + multi-select ("Extended" selection) batch-edit dialog

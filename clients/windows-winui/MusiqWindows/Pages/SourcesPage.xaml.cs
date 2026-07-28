@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using MusiqWindows.Services;
 using MusiqWindows.ViewModels;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
 using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
@@ -17,6 +18,7 @@ internal sealed partial class SourcesPage : Page
     public SourcesPage()
     {
         InitializeComponent();
+        _ = AutoConnectAsync();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -25,6 +27,27 @@ internal sealed partial class SourcesPage : Page
         // Refresh every time the page is shown, since a scan on the Library
         // page may have added a new source since our last visit.
         _ = ViewModel.RefreshCommand.ExecuteAsync(null);
+    }
+
+    /// Reconnects to whichever servers were saved from a previous session
+    /// (the underlying services are app-lifetime singletons, so this only
+    /// does real work the first time the page is created after launch).
+    private async Task AutoConnectAsync()
+    {
+        if (!PlexService.Instance.IsConnected && CredentialStore.LoadPlex() is (var plexUrl, var plexToken))
+        {
+            PlexServerUrlBox.Text = plexUrl;
+            PlexTokenBox.Password = plexToken;
+            await ViewModel.ConnectToPlexAsync(plexUrl, plexToken);
+        }
+
+        if (!NavidromeService.Instance.IsConnected && CredentialStore.LoadNavidrome() is (var navUrl, var navUser, var navPassword))
+        {
+            NavidromeServerUrlBox.Text = navUrl;
+            NavidromeUsernameBox.Text = navUser;
+            NavidromePasswordBox.Password = navPassword;
+            await ViewModel.ConnectToNavidromeAsync(navUrl, navUser, navPassword);
+        }
     }
 
     private async void PlexConnectButton_Click(object sender, RoutedEventArgs e)

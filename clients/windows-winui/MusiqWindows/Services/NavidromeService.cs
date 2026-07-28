@@ -10,8 +10,10 @@ namespace MusiqWindows.Services;
 /// <summary>
 /// Owns the current Navidrome/Subsonic-API server connection (if any).
 /// Mirrors <see cref="PlexService"/>: real streaming via each song's
-/// <c>StreamUrl</c> (`format=raw`, fetched on demand), and playing a song
-/// queues the rest of the currently-shown album/list around it.
+/// <c>StreamUrl</c> (`format=raw`, fetched on demand), playing a song queues
+/// the rest of the currently-shown album/list around it, and the connection
+/// (URL/username/password) is remembered in <see cref="CredentialStore"/>
+/// across app restarts.
 /// </summary>
 internal sealed class NavidromeService
 {
@@ -25,13 +27,23 @@ internal sealed class NavidromeService
 
     /// Connects and pings the server before returning — throws
     /// MusiqException if it's unreachable or the credentials are rejected.
+    /// On success, remembers the server URL/username/password so the app can
+    /// reconnect automatically next launch.
     public Task ConnectAsync(string baseUrl, string username, string password) =>
         Task.Run(() =>
         {
             var client = new UniffiNavidromeClient(baseUrl, username, password);
             client.TestConnection();
             _client = client;
+            CredentialStore.SaveNavidrome(baseUrl, username, password);
         });
+
+    /// Drops the live connection and forgets the saved server details.
+    public void Disconnect()
+    {
+        _client = null;
+        CredentialStore.ClearNavidrome();
+    }
 
     public Task<IReadOnlyList<UniffiNavidromeFolder>> ListMusicFoldersAsync() =>
         Task.Run(() => (IReadOnlyList<UniffiNavidromeFolder>)RequireClient().ListMusicFolders());

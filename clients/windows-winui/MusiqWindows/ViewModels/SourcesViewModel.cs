@@ -52,6 +52,9 @@ internal partial class SourcesViewModel : ObservableObject
 
     public bool CanConnectToPlex => !IsConnectingToPlex;
 
+    [ObservableProperty]
+    private bool _isPlexConnected;
+
     public ObservableCollection<UniffiPlexLibrary> PlexLibraries { get; } = new();
 
     public ObservableCollection<PlexTrackDisplay> PlexTracks { get; } = new();
@@ -64,6 +67,9 @@ internal partial class SourcesViewModel : ObservableObject
     private bool _isConnectingToNavidrome;
 
     public bool CanConnectToNavidrome => !IsConnectingToNavidrome;
+
+    [ObservableProperty]
+    private bool _isNavidromeConnected;
 
     public ObservableCollection<UniffiNavidromeFolder> NavidromeFolders { get; } = new();
 
@@ -115,6 +121,8 @@ internal partial class SourcesViewModel : ObservableObject
                 PlexLibraries.Add(library);
             }
 
+            IsPlexConnected = true;
+
             if (libraries.Count == 0)
             {
                 PlexStatusMessage = "Connected, but no music libraries were found.";
@@ -135,6 +143,16 @@ internal partial class SourcesViewModel : ObservableObject
         {
             IsConnectingToPlex = false;
         }
+    }
+
+    [RelayCommand]
+    private void DisconnectPlex()
+    {
+        PlexService.Instance.Disconnect();
+        PlexLibraries.Clear();
+        PlexTracks.Clear();
+        IsPlexConnected = false;
+        PlexStatusMessage = "Not connected.";
     }
 
     public async Task LoadPlexLibraryAsync(UniffiPlexLibrary library)
@@ -196,6 +214,8 @@ internal partial class SourcesViewModel : ObservableObject
                 NavidromeFolders.Add(folder);
             }
 
+            IsNavidromeConnected = true;
+
             if (folders.Count == 0)
             {
                 NavidromeStatusMessage = "Connected, but no music folders were found.";
@@ -214,6 +234,17 @@ internal partial class SourcesViewModel : ObservableObject
         {
             IsConnectingToNavidrome = false;
         }
+    }
+
+    [RelayCommand]
+    private void DisconnectNavidrome()
+    {
+        NavidromeService.Instance.Disconnect();
+        NavidromeFolders.Clear();
+        NavidromeAlbums.Clear();
+        NavidromeSongs.Clear();
+        IsNavidromeConnected = false;
+        NavidromeStatusMessage = "Not connected.";
     }
 
     public async Task LoadNavidromeFolderAsync(UniffiNavidromeFolder folder)

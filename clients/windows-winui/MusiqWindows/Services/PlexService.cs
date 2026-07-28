@@ -7,9 +7,9 @@ using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 namespace MusiqWindows.Services;
 
 /// <summary>
-/// Owns the current Plex Media Server connection (if any). Unlike
-/// <see cref="LibraryService"/>, there's no persistent state to keep across
-/// app restarts yet — connecting is a per-session action.
+/// Owns the current Plex Media Server connection (if any). The server URL
+/// and token are remembered in <see cref="CredentialStore"/> across app
+/// restarts, but this service itself only ever holds the live connection.
 ///
 /// Playback is real streaming: each track's <c>StreamUrl</c> is handed
 /// straight to <see cref="LibraryService"/>'s shared <c>Player</c>, which
@@ -31,13 +31,23 @@ internal sealed class PlexService
 
     /// Connects and verifies the token is accepted before returning —
     /// throws MusiqException if the server is unreachable or the token is bad.
+    /// On success, remembers the server URL and token so the app can
+    /// reconnect automatically next launch.
     public Task ConnectAsync(string baseUrl, string token) =>
         Task.Run(() =>
         {
             var client = new UniffiPlexClient(baseUrl, token);
             client.TestConnection();
             _client = client;
+            CredentialStore.SavePlex(baseUrl, token);
         });
+
+    /// Drops the live connection and forgets the saved server URL/token.
+    public void Disconnect()
+    {
+        _client = null;
+        CredentialStore.ClearPlex();
+    }
 
     public Task<IReadOnlyList<UniffiPlexLibrary>> ListMusicLibrariesAsync() =>
         Task.Run(() => (IReadOnlyList<UniffiPlexLibrary>)RequireClient().ListMusicLibraries());
