@@ -1,3 +1,5 @@
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
 using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 using UniffiTrack = uniffi.musiq_uniffi.Track;
@@ -39,6 +41,13 @@ public sealed record TrackItem(
     /// Plex/Navidrome tracks (their album art is shown at the album level,
     /// not per-track) or local tracks with no embedded picture.
     public string? ArtUrl { get; init; }
+
+    /// `Image.Source`'s implicit string->ImageSource conversion
+    /// (`XamlBindingHelper.ConvertValue`) throws `ArgumentException` for a
+    /// null value instead of producing an empty source, which crashed the
+    /// app on every track with no embedded art. Building the `ImageSource`
+    /// explicitly here sidesteps that conversion entirely.
+    public ImageSource? ArtImageSource => ArtUrl is null ? null : new BitmapImage(new Uri(ArtUrl));
 
 
     internal static TrackItem From(UniffiTrack track)

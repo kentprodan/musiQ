@@ -7,6 +7,23 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Live UI verification, crash fix, window/title-bar polish
+
+### Fixed
+- **Crash on every launch once a track had no embedded art**: `LibraryPage.xaml`'s `Image.Source="{x:Bind ArtUrl}"` relied on x:Bind's implicit string→`ImageSource` conversion (`Microsoft.UI.Xaml.Markup.XamlBindingHelper.ConvertValue`), which throws `System.ArgumentException: The parameter is incorrect` for a `null` value instead of producing an empty source — so every track without embedded art crashed the app on launch (confirmed via the app's own `UnhandledException` handler, which logs to `crash.log` in the package's `LocalState` folder). This was exactly the "not fully doc-confirmed" risk flagged in the previous entry below. Fixed by adding `TrackItem.ArtImageSource` (a computed `ImageSource?` built explicitly in C#, `null`-safe) and binding to that instead.
+- **Live-verified this session**: title bar search, Library sort/filter, and local album art all confirmed working in the running packaged app once the crash above was fixed — closing out the verification item from the previous entry.
+
+### Added
+- **App icon**: full MSIX visual asset set (`Square44x44Logo`/`Square150x150Logo`/`Wide310x150Logo`/`StoreLogo`/`LockScreenLogo`/`SplashScreen`, all scale/targetsize variants) plus a multi-resolution `AppIcon.ico`, generated from a single 1024×1024 source PNG via Pillow (confirmed via Microsoft's Visual Studio asset-generation docs that a ≥400×400 square source image is the expected input for this asset set).
+- **Window sizing**: minimum size 800×600 via `OverlappedPresenter.PreferredMinimumWidth`/`PreferredMinimumHeight` (the documented API for this — confirmed via Microsoft's "Manage app windows" doc); size is now remembered across restarts via `ApplicationData.LocalSettings` (skipped while maximized/minimized so it always records the last *restored* size, not a maximized one).
+- **Title bar**: title changed to "musiQ"; a `Subtitle` now shows the current page (Library/Now Playing/Sources/Settings), updated in the existing `Frame.Navigated` handler.
+- **Title bar search redesign**: the `AutoSuggestBox`'s built-in query icon was replaced with a `SplitButton` to its right, using the official `AnimatedFindVisualSource` animated icon (the same one `AutoSuggestBox` itself uses internally, confirmed via the `AnimatedIcon` control's docs) with a `SymbolIconSource` fallback. Its dropdown is a `MenuFlyout` rebuilt on every open with `ToggleMenuFlyoutItem`s for "Library" (always on), and "Navidrome"/"Plex" (only added if `NavidromeService.Instance.IsConnected`/`PlexService.Instance.IsConnected`). **Not yet real**: toggling Navidrome/Plex only records intent — actually scoping search to those sources needs a free-text search endpoint added to their core clients (Subsonic's `search3`, Plex's `/hubs/search`), which don't exist yet; only hierarchical browsing does.
+- **Search box width**: now responsive (~30% of window width, clamped 200–480px), driven from the root `Grid`'s `SizeChanged` event, since `TitleBar.Content` has no official star-sizing and is otherwise sized to its content's desired width regardless of available space.
+
+### Investigated, no code change
+- **Title bar icon's left-click/double-click behavior** (opens system menu / closes the window): confirmed via a Microsoft Q&A thread and a `microsoft-ui-xaml` GitHub issue that this is standard OS convention baked into the `TitleBar` control, not app-specific, and there's no supported way to keep the icon visible while suppressing it (`IconShowOptions.HideIconAndSystemMenu` removes both together) — left as-is per the user's call.
+- **System menu rendering light instead of dark-themed** (inconsistent across apps, e.g. Calculator dark vs. WinUI 3 Gallery light): confirmed there is **no official Microsoft API** for this — `DWMWA_USE_IMMERSIVE_DARK_MODE` only affects the title bar/caption chrome, not the classic system menu. The only known method is an undocumented `uxtheme.dll` ordinal function (`SetPreferredAppMode`), which we're deliberately not using since it's unsupported and could break on a Windows update.
+
 ## 2026-07-28 — Title bar search, Library sort, local album art
 
 ### Added

@@ -79,7 +79,7 @@
                             Grid.Column="0"
                             Width="40"
                             Height="40"
-                            Source="{x:Bind ArtUrl}"
+                            Source="{x:Bind ArtImageSource}"
                             Stretch="UniformToFill" />
                         <TextBlock Grid.Column="1" Text="{x:Bind Title}" />
                         <TextBlock Grid.Column="2" Text="{x:Bind Artist}" />
