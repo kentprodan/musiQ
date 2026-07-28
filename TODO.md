@@ -11,12 +11,12 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 
 ## Core (Rust)
 
-- [x] Tag *writing* / batch editing (title/artist/album, single + multi-track) — rename-on-disk patterns (Mp3Tag's other half) still open, see below
+- [x] Tag *writing* / batch editing (title/artist/album, single + multi-track)
+- [x] File rename/move on disk from tag patterns (`{artist}/{album}/{title}`-style, sanitized, subfolder-creating) — full Mp3Tag-parity feature now done
 - [x] Audio playback engine (`rodio`) — single-track play/pause/resume/stop/volume
 - [x] Playback queue management (next/previous, shuffle, repeat) — auto-advance on natural track end still needs multi-track hardware verification (only tested with a 1-track library so far)
-- [ ] Plex client (`musiq-net` equivalent)
+- [ ] Plex client (`musiq-net` equivalent) — up next
 - [ ] Subsonic/Navidrome client
-- [ ] File rename/move on disk from tag patterns (e.g. `{artist}/{album}/{title}`) — the Mp3Tag-parity feature explicitly descoped from the tag-writing pass above
 - [ ] Sandboxed plugin host (WASM, capability-scoped manifests)
 - [ ] Extend UniFFI contract as each of the above lands, regenerate Swift/Kotlin bindings alongside C#
 

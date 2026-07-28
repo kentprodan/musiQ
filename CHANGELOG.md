@@ -7,6 +7,14 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Rename on disk (Mp3Tag-parity complete)
+
+### Added
+- **`core/musiq-core::rename`**: substitutes `{title}`/`{artist}`/`{album}` into a pattern (own `/`/`\` separators preserved, only the substituted values are sanitized for illegal filesystem characters). `Library::rename_tracks(track_ids, base_folder, pattern)` resolves each track's final path under `base_folder`, creates any needed subfolders, moves the file (`std::fs::rename`), and updates its stored path — refusing to overwrite an existing file at the destination. Missing tags fall back the same way the UI displays them (filename for title, "Unknown Artist"/"Unknown Album"). New `MusiqError::Rename` variant.
+- **`ffi/musiq-uniffi`**: mirrors `rename_tracks`, regenerated into the C# bindings.
+- **WinUI3 shell**: a "Rename Selected…" button on the Library page — pick a destination folder (reusing the same `FolderPicker` flow as Scan Folder), then a pattern dialog (default `{artist}/{album}/{title}`, helper text listing placeholders) — applies to the current multi-selection.
+- Verified end-to-end on the Windows desktop: renamed the scanned track into a fresh nested folder structure, confirmed the file physically moved (old path gone, new path holds it) and playback still works from the new path, then reverted everything (moved the file back, rescanned) to leave the test library exactly as it was.
+
 ## 2026-07-28 — Tag writing and batch editing
 
 ### Added

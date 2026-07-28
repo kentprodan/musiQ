@@ -20,6 +20,7 @@
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Library" VerticalAlignment="Center" />
             <Button x:Name="ScanFolderButton" Content="Scan Folder…" Click="ScanFolderButton_Click" />
             <Button x:Name="EditSelectedButton" Content="Edit Selected…" Click="EditSelectedButton_Click" />
+            <Button x:Name="RenameSelectedButton" Content="Rename Selected…" Click="RenameSelectedButton_Click" />
             <ProgressRing IsActive="{x:Bind ViewModel.IsScanning, Mode=OneWay}" Width="20" Height="20" />
         </StackPanel>
 
@@ -101,6 +102,26 @@
                 <TextBlock Text="Leave a field blank to keep each track's existing value." Opacity="0.7" TextWrapping="Wrap" />
                 <TextBox x:Name="BatchArtistBox" Header="Artist" />
                 <TextBox x:Name="BatchAlbumBox" Header="Album" />
+            </StackPanel>
+        </ContentDialog>
+
+        <ContentDialog
+            x:Name="RenamePatternDialog"
+            Title="Rename selected tracks"
+            PrimaryButtonText="Rename"
+            CloseButtonText="Cancel"
+            DefaultButton="Primary">
+            <StackPanel Spacing="12" MinWidth="360">
+                <TextBlock Opacity="0.7" TextWrapping="Wrap">
+                    <Run Text="Files move into the folder you just picked, using this pattern. Placeholders:" />
+                    <Run Text="{}{title}" FontFamily="Consolas" />
+                    <Run Text="," />
+                    <Run Text="{}{artist}" FontFamily="Consolas" />
+                    <Run Text="," />
+                    <Run Text="{}{album}" FontFamily="Consolas" />
+                    <Run Text="— use / to create subfolders." />
+                </TextBlock>
+                <TextBox x:Name="RenamePatternBox" Header="Pattern" Text="{}{artist}/{album}/{title}" />
             </StackPanel>
         </ContentDialog>
     </Grid>

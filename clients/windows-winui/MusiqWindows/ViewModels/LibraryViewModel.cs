@@ -112,4 +112,19 @@ public partial class LibraryViewModel : ObservableObject
             StatusMessage = $"Batch tag update failed: {ex.Message}";
         }
     }
+
+    /// Moves every track in `trackIds` to `baseFolder` joined with `pattern`.
+    public async Task SaveRenameAsync(IReadOnlyList<string> trackIds, string baseFolder, string pattern)
+    {
+        try
+        {
+            var count = await LibraryService.Instance.RenameTracksAsync(trackIds, baseFolder, pattern);
+            StatusMessage = $"Renamed {count} track(s) into {baseFolder}.";
+            await RefreshAsync();
+        }
+        catch (MusiqException ex)
+        {
+            StatusMessage = $"Rename failed: {ex.Message}";
+        }
+    }
 }

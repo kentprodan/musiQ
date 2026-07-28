@@ -98,4 +98,41 @@ public sealed partial class LibraryPage : Page
 
         await ViewModel.SaveBatchTagEditAsync(selectedIds, BatchArtistBox.Text, BatchAlbumBox.Text);
     }
+
+    private async void RenameSelectedButton_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedIds = TracksListView.SelectedItems
+            .OfType<TrackItem>()
+            .Select(t => t.Id)
+            .ToList();
+
+        if (selectedIds.Count == 0)
+        {
+            ViewModel.StatusMessage = "Select one or more tracks first.";
+            return;
+        }
+
+        var picker = new FolderPicker
+        {
+            SuggestedStartLocation = PickerLocationId.MusicLibrary,
+        };
+        picker.FileTypeFilter.Add("*");
+        var hwnd = WindowNative.GetWindowHandle(App.MainAppWindow!);
+        InitializeWithWindow.Initialize(picker, hwnd);
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is null)
+        {
+            return;
+        }
+
+        RenamePatternDialog.XamlRoot = XamlRoot;
+        var result = await RenamePatternDialog.ShowAsync();
+        if (result != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        await ViewModel.SaveRenameAsync(selectedIds, folder.Path, RenamePatternBox.Text);
+    }
 }

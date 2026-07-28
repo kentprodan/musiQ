@@ -68,6 +68,12 @@ internal sealed class LibraryService
     public Task<uint> UpdateTagsAsync(IReadOnlyList<string> trackIds, string? title, string? artist, string? album) =>
         Task.Run(() => _library.UpdateTags(trackIds.ToArray(), title, artist, album));
 
+    /// Moves each track to `baseFolder` joined with `pattern` (e.g.
+    /// "{artist}/{album}/{title}"), renaming it on disk. Returns the number
+    /// of tracks moved.
+    public Task<uint> RenameTracksAsync(IReadOnlyList<string> trackIds, string baseFolder, string pattern) =>
+        Task.Run(() => _library.RenameTracks(trackIds.ToArray(), baseFolder, pattern));
+
     /// Replaces the queue with `tracks` and starts playing the one at `startIndex`.
     public async Task PlayQueueAsync(IReadOnlyList<TrackItem> tracks, int startIndex)
     {

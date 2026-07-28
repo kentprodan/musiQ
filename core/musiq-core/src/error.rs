@@ -10,4 +10,6 @@ pub enum MusiqError {
     Playback(String),
     #[error("tag error: {0}")]
     Tag(String),
+    #[error("rename error: {0}")]
+    Rename(String),
 }

@@ -43,6 +43,8 @@ pub enum MusiqError {
     Playback { message: String },
     #[error("tag error: {message}")]
     Tag { message: String },
+    #[error("rename error: {message}")]
+    Rename { message: String },
 }
 
 impl From<CoreError> for MusiqError {
@@ -57,6 +59,7 @@ impl From<CoreError> for MusiqError {
             CoreError::InvalidPath(p) => MusiqError::InvalidPath { message: p },
             CoreError::Playback(p) => MusiqError::Playback { message: p },
             CoreError::Tag(p) => MusiqError::Tag { message: p },
+            CoreError::Rename(p) => MusiqError::Rename { message: p },
         }
     }
 }
@@ -107,6 +110,19 @@ impl Library {
     ) -> Result<u32, MusiqError> {
         let library = self.inner.lock().unwrap();
         Ok(library.update_tags(&track_ids, title, artist, album)?)
+    }
+
+    /// Moves each track in `track_ids` to `base_folder` joined with
+    /// `pattern` (`{title}`/`{artist}`/`{album}` placeholders), renaming it
+    /// on disk and updating its stored path. Returns the number of tracks moved.
+    pub fn rename_tracks(
+        &self,
+        track_ids: Vec<String>,
+        base_folder: String,
+        pattern: String,
+    ) -> Result<u32, MusiqError> {
+        let library = self.inner.lock().unwrap();
+        Ok(library.rename_tracks(&track_ids, &PathBuf::from(base_folder), &pattern)?)
     }
 }
 

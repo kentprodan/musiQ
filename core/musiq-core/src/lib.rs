@@ -6,6 +6,7 @@
 mod db;
 mod error;
 mod player;
+mod rename;
 mod scan;
 mod tags;
 
@@ -13,7 +14,7 @@ pub use error::MusiqError;
 pub use player::{Player, RepeatMode};
 
 use rusqlite::Connection;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Track {
@@ -95,6 +96,80 @@ impl Library {
                 |row| row.get(0),
             )?;
             tags::update_track_tags(&self.conn, track_id, Path::new(&path), &update)?;
+            count += 1;
+        }
+        Ok(count)
+    }
+
+    /// Moves each track in `track_ids` to `base_folder` joined with `pattern`
+    /// (tag placeholders `{title}`/`{artist}`/`{album}` substituted, e.g.
+    /// `"{artist}/{album}/{title}"`), preserving its original extension.
+    /// Missing tags fall back the same way the UI displays them (filename
+    /// for title, "Unknown Artist"/"Unknown Album"). Refuses to overwrite an
+    /// existing file at the destination. Returns the number of tracks moved.
+    pub fn rename_tracks(
+        &self,
+        track_ids: &[String],
+        base_folder: &Path,
+        pattern: &str,
+    ) -> Result<u32, MusiqError> {
+        let mut count = 0u32;
+        for track_id in track_ids {
+            let (path, title, artist, album): (
+                String,
+                Option<String>,
+                Option<String>,
+                Option<String>,
+            ) = self.conn.query_row(
+                "SELECT path, title, artist, album FROM tracks WHERE id = ?1",
+                [track_id],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
+            )?;
+
+            let old_path = PathBuf::from(&path);
+            let ext = old_path.extension().and_then(|e| e.to_str()).unwrap_or("");
+
+            let title_value = title.filter(|s| !s.is_empty()).unwrap_or_else(|| {
+                old_path
+                    .file_stem()
+                    .map(|s| s.to_string_lossy().into_owned())
+                    .unwrap_or_default()
+            });
+            let artist_value = artist
+                .filter(|s| !s.is_empty())
+                .unwrap_or_else(|| "Unknown Artist".to_string());
+            let album_value = album
+                .filter(|s| !s.is_empty())
+                .unwrap_or_else(|| "Unknown Album".to_string());
+
+            let relative = rename::apply_pattern(pattern, &title_value, &artist_value, &album_value);
+            let mut new_path = base_folder.to_path_buf();
+            for component in relative.split(['/', '\\']) {
+                if !component.is_empty() {
+                    new_path.push(component);
+                }
+            }
+            new_path.set_extension(ext);
+
+            if new_path == old_path {
+                count += 1;
+                continue;
+            }
+            if new_path.exists() {
+                return Err(MusiqError::Rename(format!(
+                    "target already exists: {}",
+                    new_path.display()
+                )));
+            }
+            if let Some(parent) = new_path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            std::fs::rename(&old_path, &new_path)?;
+
+            self.conn.execute(
+                "UPDATE tracks SET path = ?1 WHERE id = ?2",
+                rusqlite::params![new_path.to_string_lossy(), track_id],
+            )?;
             count += 1;
         }
         Ok(count)
