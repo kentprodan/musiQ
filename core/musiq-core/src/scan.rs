@@ -41,6 +41,8 @@ pub fn scan_folder(conn: &Connection, folder: &Path) -> Result<u32, MusiqError> 
         let title = tag.and_then(|t| t.title()).map(|s| s.into_owned());
         let artist = tag.and_then(|t| t.artist()).map(|s| s.into_owned());
         let album = tag.and_then(|t| t.album()).map(|s| s.into_owned());
+        let year = tag.and_then(|t| t.date()).map(|d| u32::from(d.year));
+        let genre = tag.and_then(|t| t.genre()).map(|s| s.into_owned());
         let duration_secs = tagged_file.properties().duration().as_secs() as u32;
 
         let id = uuid::Uuid::new_v4().to_string();
@@ -50,14 +52,16 @@ pub fn scan_folder(conn: &Connection, folder: &Path) -> Result<u32, MusiqError> 
         let path_str = path.to_string_lossy().into_owned();
 
         conn.execute(
-            "INSERT INTO tracks (id, path, title, artist, album, duration_secs, added_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+            "INSERT INTO tracks (id, path, title, artist, album, duration_secs, year, genre, added_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
              ON CONFLICT(path) DO UPDATE SET
                 title = excluded.title,
                 artist = excluded.artist,
                 album = excluded.album,
-                duration_secs = excluded.duration_secs",
-            params![id, path_str, title, artist, album, duration_secs, added_at],
+                duration_secs = excluded.duration_secs,
+                year = excluded.year,
+                genre = excluded.genre",
+            params![id, path_str, title, artist, album, duration_secs, year, genre, added_at],
         )?;
         count += 1;
     }

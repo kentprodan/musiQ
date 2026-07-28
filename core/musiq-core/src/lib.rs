@@ -30,6 +30,8 @@ pub struct Track {
     pub artist: Option<String>,
     pub album: Option<String>,
     pub duration_secs: Option<u32>,
+    pub year: Option<u32>,
+    pub genre: Option<String>,
 }
 
 pub struct Library {
@@ -62,7 +64,7 @@ impl Library {
     /// Lists every track currently in the library, ordered by artist then album then title.
     pub fn list_tracks(&self) -> Result<Vec<Track>, MusiqError> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, path, title, artist, album, duration_secs
+            "SELECT id, path, title, artist, album, duration_secs, year, genre
              FROM tracks
              ORDER BY artist, album, title",
         )?;
@@ -74,6 +76,8 @@ impl Library {
                 artist: row.get(3)?,
                 album: row.get(4)?,
                 duration_secs: row.get::<_, Option<u32>>(5)?,
+                year: row.get::<_, Option<u32>>(6)?,
+                genre: row.get::<_, Option<String>>(7)?,
             })
         })?;
 

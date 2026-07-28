@@ -34,7 +34,9 @@ public sealed record TrackItem(
     string Path,
     string? RawTitle,
     string? RawArtist,
-    string? RawAlbum)
+    string? RawAlbum,
+    string Year,
+    string Genre)
 {
     /// Embedded cover art, as a `file:///`-style absolute URI string that
     /// XAML's `Image.Source` converter can bind to directly. `null` for
@@ -66,9 +68,14 @@ public sealed record TrackItem(
             Path: track.Path,
             RawTitle: track.Title,
             RawArtist: track.Artist,
-            RawAlbum: track.Album);
+            RawAlbum: track.Album,
+            Year: track.Year?.ToString() ?? string.Empty,
+            Genre: track.Genre ?? string.Empty);
     }
 
+    // Plex/Navidrome don't surface year/genre in what they return today —
+    // browsing them is organized by artist/album, not a flat tag dump like
+    // the local library's scan.
     internal static TrackItem FromPlex(UniffiPlexTrack track, string streamUrl)
     {
         return new TrackItem(
@@ -81,7 +88,9 @@ public sealed record TrackItem(
             Path: streamUrl,
             RawTitle: track.Title,
             RawArtist: track.Artist,
-            RawAlbum: track.Album);
+            RawAlbum: track.Album,
+            Year: string.Empty,
+            Genre: string.Empty);
     }
 
     internal static TrackItem FromNavidrome(UniffiNavidromeSong song)
@@ -96,7 +105,9 @@ public sealed record TrackItem(
             Path: song.StreamUrl,
             RawTitle: song.Title,
             RawArtist: song.Artist,
-            RawAlbum: song.Album);
+            RawAlbum: song.Album,
+            Year: string.Empty,
+            Genre: string.Empty);
     }
 
     private static string FormatDuration(uint? secs) =>

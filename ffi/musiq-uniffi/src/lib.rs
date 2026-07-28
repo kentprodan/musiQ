@@ -16,6 +16,8 @@ pub struct Track {
     pub artist: Option<String>,
     pub album: Option<String>,
     pub duration_secs: Option<u32>,
+    pub year: Option<u32>,
+    pub genre: Option<String>,
 }
 
 impl From<musiq_core::Track> for Track {
@@ -27,6 +29,8 @@ impl From<musiq_core::Track> for Track {
             artist: t.artist,
             album: t.album,
             duration_secs: t.duration_secs,
+            year: t.year,
+            genre: t.genre,
         }
     }
 }

@@ -11,6 +11,7 @@ public partial class SettingsViewModel : ObservableObject
 {
     private const string ThemeSetting = "AppTheme";
     private const string SoundSetting = "UiSoundEnabled";
+    private const string TrackCheckboxesSetting = "ShowTrackSelectionCheckboxes";
 
     public string DatabasePath { get; } = LibraryService.Instance.DatabasePath;
 
@@ -43,6 +44,12 @@ public partial class SettingsViewModel : ObservableObject
         Windows.Storage.ApplicationData.Current.LocalSettings.Values[SoundSetting] = value;
         ApplySoundEnabled(value);
     }
+
+    [ObservableProperty]
+    private bool _showTrackSelectionCheckboxes = LoadSavedShowTrackSelectionCheckboxes();
+
+    partial void OnShowTrackSelectionCheckboxesChanged(bool value) =>
+        Windows.Storage.ApplicationData.Current.LocalSettings.Values[TrackCheckboxesSetting] = value;
 
     public SettingsViewModel()
     {
@@ -127,6 +134,17 @@ public partial class SettingsViewModel : ObservableObject
     /// only, so a plain On/Off toggle covers desktop meaningfully.
     public static void ApplySoundEnabled(bool enabled) =>
         ElementSoundPlayer.State = enabled ? ElementSoundPlayerState.On : ElementSoundPlayerState.Off;
+
+    /// Reads the persisted choice without needing a live ViewModel — used by
+    /// <c>LibraryPage</c> when it builds the Tracks table.
+    public static bool LoadSavedShowTrackSelectionCheckboxes() =>
+        Windows.Storage.ApplicationData.Current.LocalSettings.Values[TrackCheckboxesSetting] as bool? ?? false;
+
+    /// Written by <c>LibraryPage</c>'s own CommandBar toggle (a second entry
+    /// point for the same setting besides the Settings page's ToggleSwitch),
+    /// so both stay backed by the same LocalSettings value.
+    public static void SaveShowTrackSelectionCheckboxes(bool value) =>
+        Windows.Storage.ApplicationData.Current.LocalSettings.Values[TrackCheckboxesSetting] = value;
 
     private static string GetAppVersion()
     {

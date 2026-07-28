@@ -9,95 +9,115 @@
     xmlns:viewmodels="using:MusiqWindows.ViewModels"
     mc:Ignorable="d">
 
-    <Grid x:Name="LibraryPageRoot" Padding="24,16,24,16" RowSpacing="12">
+    <Page.Resources>
+        <MenuFlyout x:Key="RowMoreFlyout" x:Name="RowMoreFlyout">
+            <MenuFlyoutItem Text="Edit tags…" Tag="edit" Click="RowMoreFlyoutItem_Click">
+                <MenuFlyoutItem.Icon>
+                    <FontIcon Glyph="&#xE70F;" />
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+        </MenuFlyout>
+    </Page.Resources>
+
+    <Grid x:Name="LibraryPageRoot" Padding="24,16,24,0" RowSpacing="8">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Library" VerticalAlignment="Center" />
-            <Button x:Name="ScanFolderButton" Content="Scan Folder…" Click="ScanFolderButton_Click" />
-            <Button x:Name="EditSelectedButton" Content="Edit Selected…" Click="EditSelectedButton_Click" />
-            <Button x:Name="RenameSelectedButton" Content="Rename Selected…" Click="RenameSelectedButton_Click" />
-            <ComboBox
-                x:Name="SortFieldComboBox"
-                Header="Sort by"
-                SelectedIndex="0"
-                SelectionChanged="SortFieldComboBox_SelectionChanged">
-                <ComboBoxItem Content="Title" />
-                <ComboBoxItem Content="Artist" />
-                <ComboBoxItem Content="Album" />
-                <ComboBoxItem Content="Duration" />
-            </ComboBox>
-            <Button
-                x:Name="SortDirectionButton"
-                VerticalAlignment="Bottom"
-                Click="SortDirectionButton_Click"
-                ToolTipService.ToolTip="Toggle sort direction">
-                <FontIcon x:Name="SortDirectionIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE70E;" />
-            </Button>
-            <ProgressRing IsActive="{x:Bind ViewModel.IsScanning, Mode=OneWay}" Width="20" Height="20" />
+        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Library" />
+
+        <CommandBar
+            x:Name="LibraryCommandBar"
+            Grid.Row="1"
+            HorizontalAlignment="Left"
+            Background="Transparent"
+            DefaultLabelPosition="Right"
+            IsOpen="False">
+            <AppBarButton x:Name="ScanFolderButton" Label="Scan Folder…" Click="ScanFolderButton_Click">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE8DA;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton x:Name="EditSelectedButton" Label="Edit Selected" Click="EditSelectedButton_Click">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE70F;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton x:Name="RenameSelectedButton" Label="Rename Selected" Click="RenameSelectedButton_Click">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE8AC;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarSeparator />
+            <AppBarToggleButton x:Name="SelectionCheckboxesToggle" Label="Selection checkboxes" Click="SelectionCheckboxesToggle_Click">
+                <AppBarToggleButton.Icon>
+                    <FontIcon Glyph="&#xE9D5;" />
+                </AppBarToggleButton.Icon>
+            </AppBarToggleButton>
+            <AppBarButton x:Name="ColumnsButton" Label="Columns…" Click="ColumnsButton_Click">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE8A9;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+        </CommandBar>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,0,4">
+            <TextBlock Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Opacity="0.7" />
+            <ProgressRing IsActive="{x:Bind ViewModel.IsScanning, Mode=OneWay}" Width="16" Height="16" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Opacity="0.7" />
-
-        <ListView x:Name="TracksListView" Grid.Row="2" ItemsSource="{x:Bind ViewModel.Tracks}" SelectionMode="Extended">
-            <ListView.HeaderTemplate>
-                <DataTemplate>
-                    <Grid Padding="12,4" ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="48" />
-                            <ColumnDefinition Width="3*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="48" />
-                            <ColumnDefinition Width="48" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="1" Text="Title" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="2" Text="Artist" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="3" Text="Album" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="4" Text="Duration" FontWeight="SemiBold" />
-                    </Grid>
-                </DataTemplate>
-            </ListView.HeaderTemplate>
+        <ListView
+            x:Name="TracksListView"
+            Grid.Row="3"
+            Margin="-24,0,-24,0"
+            Padding="24,0,24,0"
+            ItemsSource="{x:Bind ViewModel.Tracks}"
+            SelectionMode="Extended"
+            ContainerContentChanging="TracksListView_ContainerContentChanging">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="MinHeight" Value="40" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:TrackItem">
-                    <Grid Padding="12,8" ColumnSpacing="12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="48" />
-                            <ColumnDefinition Width="3*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="2*" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="48" />
-                            <ColumnDefinition Width="48" />
-                        </Grid.ColumnDefinitions>
-                        <Image
-                            Grid.Column="0"
-                            Width="40"
-                            Height="40"
-                            Source="{x:Bind ArtImageSource}"
-                            Stretch="UniformToFill" />
-                        <TextBlock Grid.Column="1" Text="{x:Bind Title}" />
-                        <TextBlock Grid.Column="2" Text="{x:Bind Artist}" />
-                        <TextBlock Grid.Column="3" Text="{x:Bind Album}" />
-                        <TextBlock Grid.Column="4" Text="{x:Bind Duration}" />
+                    <Grid
+                        MinHeight="40"
+                        Background="Transparent"
+                        Tag="{x:Bind}"
+                        DoubleTapped="TrackRow_DoubleTapped"
+                        PointerEntered="TrackRow_PointerEntered"
+                        PointerExited="TrackRow_PointerExited">
                         <Button
-                            Grid.Column="5"
+                            x:Name="RowPlayButton"
                             Padding="8,4"
-                            Command="{Binding DataContext.PlayTrackCommand, ElementName=LibraryPageRoot}"
-                            CommandParameter="{Binding}">
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"
+                            Tag="{x:Bind}"
+                            Click="RowPlayButton_Click">
                             <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE768;" FontSize="12" />
                         </Button>
+                        <TextBlock x:Name="TitleText" Text="{x:Bind Title}" Margin="12,0,12,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="TimeText" Text="{x:Bind Duration}" Margin="12,0,12,0" VerticalAlignment="Center" Opacity="0.7" />
+                        <TextBlock x:Name="ArtistText" Text="{x:Bind Artist}" Margin="12,0,12,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="AlbumText" Text="{x:Bind Album}" Margin="12,0,12,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="YearText" Text="{x:Bind Year}" Margin="12,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="GenreText" Text="{x:Bind Genre}" Margin="12,0,12,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         <Button
-                            Grid.Column="6"
+                            x:Name="RowMoreButton"
                             Padding="8,4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="Collapsed"
                             Tag="{x:Bind}"
-                            Click="EditTrackButton_Click">
-                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE70F;" FontSize="12" />
+                            Click="RowMoreButton_Click">
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE712;" FontSize="14" />
                         </Button>
                     </Grid>
                 </DataTemplate>
@@ -148,6 +168,14 @@
                 </TextBlock>
                 <TextBox x:Name="RenamePatternBox" Header="Pattern" Text="{}{artist}/{album}/{title}" />
             </StackPanel>
+        </ContentDialog>
+
+        <ContentDialog
+            x:Name="CustomizeColumnsDialog"
+            Title="Customize columns"
+            PrimaryButtonText="Close"
+            DefaultButton="Primary">
+            <StackPanel x:Name="CustomizeColumnsPanel" Spacing="8" MinWidth="280" />
         </ContentDialog>
     </Grid>
 </Page>

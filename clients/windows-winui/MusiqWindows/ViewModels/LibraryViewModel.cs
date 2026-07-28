@@ -12,6 +12,8 @@ public enum TrackSortField
     Artist,
     Album,
     Duration,
+    Year,
+    Genre,
 }
 
 public partial class LibraryViewModel : ObservableObject
@@ -87,6 +89,8 @@ public partial class LibraryViewModel : ObservableObject
             TrackSortField.Artist => SortDescending ? query.OrderByDescending(t => t.Artist) : query.OrderBy(t => t.Artist),
             TrackSortField.Album => SortDescending ? query.OrderByDescending(t => t.Album) : query.OrderBy(t => t.Album),
             TrackSortField.Duration => SortDescending ? query.OrderByDescending(t => t.DurationSecs ?? 0) : query.OrderBy(t => t.DurationSecs ?? 0),
+            TrackSortField.Year => SortDescending ? query.OrderByDescending(t => t.Year) : query.OrderBy(t => t.Year),
+            TrackSortField.Genre => SortDescending ? query.OrderByDescending(t => t.Genre) : query.OrderBy(t => t.Genre),
             _ => SortDescending ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
         };
 

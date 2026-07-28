@@ -41,6 +41,13 @@
                     <controls:SettingsCard Header="Sound" Description="Controls provide audible feedback" HeaderIcon="{ui:FontIcon Glyph=&#xEC4F;}">
                         <ToggleSwitch IsOn="{x:Bind ViewModel.UiSoundEnabled, Mode=TwoWay}" OnContent="On" OffContent="Off" />
                     </controls:SettingsCard>
+
+                    <controls:SettingsCard
+                        Header="Track list selection checkboxes"
+                        Description="Show a checkbox on every row in the Tracks table for multi-selecting"
+                        HeaderIcon="{ui:FontIcon Glyph=&#xE9D5;}">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.ShowTrackSelectionCheckboxes, Mode=TwoWay}" OnContent="On" OffContent="Off" />
+                    </controls:SettingsCard>
                 </StackPanel>
             </Grid>
         </ScrollViewer>
