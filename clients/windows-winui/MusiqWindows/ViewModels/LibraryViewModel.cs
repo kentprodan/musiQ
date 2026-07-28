@@ -70,4 +70,46 @@ public partial class LibraryViewModel : ObservableObject
             StatusMessage = $"Playback failed: {ex.Message}";
         }
     }
+
+    /// Writes title/artist/album for a single track. Unlike the batch path,
+    /// all three fields are always applied — the dialog pre-fills them with
+    /// the track's current values, so an unedited field is a no-op write.
+    public async Task SaveTagEditAsync(string trackId, string title, string artist, string album)
+    {
+        try
+        {
+            await LibraryService.Instance.UpdateTagsAsync(new[] { trackId }, title, artist, album);
+            await RefreshAsync();
+        }
+        catch (MusiqException ex)
+        {
+            StatusMessage = $"Tag update failed: {ex.Message}";
+        }
+    }
+
+    /// Batch-writes artist/album (never title, since it's almost always
+    /// per-track) across `trackIds`. A blank field means "leave untouched"
+    /// here, not "clear" — batch-clearing isn't exposed by this dialog.
+    public async Task SaveBatchTagEditAsync(IReadOnlyList<string> trackIds, string artist, string album)
+    {
+        string? artistUpdate = string.IsNullOrEmpty(artist) ? null : artist;
+        string? albumUpdate = string.IsNullOrEmpty(album) ? null : album;
+
+        if (artistUpdate is null && albumUpdate is null)
+        {
+            StatusMessage = "Nothing to update — fill in Artist and/or Album.";
+            return;
+        }
+
+        try
+        {
+            var count = await LibraryService.Instance.UpdateTagsAsync(trackIds, null, artistUpdate, albumUpdate);
+            StatusMessage = $"Updated tags on {count} track(s).";
+            await RefreshAsync();
+        }
+        catch (MusiqException ex)
+        {
+            StatusMessage = $"Batch tag update failed: {ex.Message}";
+        }
+    }
 }

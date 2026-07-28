@@ -19,12 +19,13 @@
         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Library" VerticalAlignment="Center" />
             <Button x:Name="ScanFolderButton" Content="Scan Folder…" Click="ScanFolderButton_Click" />
+            <Button x:Name="EditSelectedButton" Content="Edit Selected…" Click="EditSelectedButton_Click" />
             <ProgressRing IsActive="{x:Bind ViewModel.IsScanning, Mode=OneWay}" Width="20" Height="20" />
         </StackPanel>
 
         <TextBlock Grid.Row="1" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" Opacity="0.7" />
 
-        <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.Tracks}" SelectionMode="None">
+        <ListView x:Name="TracksListView" Grid.Row="2" ItemsSource="{x:Bind ViewModel.Tracks}" SelectionMode="Extended">
             <ListView.HeaderTemplate>
                 <DataTemplate>
                     <Grid Padding="12,4" ColumnSpacing="12">
@@ -33,6 +34,7 @@
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Title" FontWeight="SemiBold" />
@@ -51,6 +53,7 @@
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="80" />
                             <ColumnDefinition Width="48" />
+                            <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{x:Bind Title}" />
                         <TextBlock Grid.Column="1" Text="{x:Bind Artist}" />
@@ -63,9 +66,42 @@
                             CommandParameter="{Binding}">
                             <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE768;" FontSize="12" />
                         </Button>
+                        <Button
+                            Grid.Column="5"
+                            Padding="8,4"
+                            Tag="{x:Bind}"
+                            Click="EditTrackButton_Click">
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE70F;" FontSize="12" />
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <ContentDialog
+            x:Name="EditTrackDialog"
+            Title="Edit tags"
+            PrimaryButtonText="Save"
+            CloseButtonText="Cancel"
+            DefaultButton="Primary">
+            <StackPanel Spacing="12" MinWidth="320">
+                <TextBox x:Name="EditTitleBox" Header="Title" />
+                <TextBox x:Name="EditArtistBox" Header="Artist" />
+                <TextBox x:Name="EditAlbumBox" Header="Album" />
+            </StackPanel>
+        </ContentDialog>
+
+        <ContentDialog
+            x:Name="BatchEditDialog"
+            Title="Edit tags for selected tracks"
+            PrimaryButtonText="Save"
+            CloseButtonText="Cancel"
+            DefaultButton="Primary">
+            <StackPanel Spacing="12" MinWidth="320">
+                <TextBlock Text="Leave a field blank to keep each track's existing value." Opacity="0.7" TextWrapping="Wrap" />
+                <TextBox x:Name="BatchArtistBox" Header="Artist" />
+                <TextBox x:Name="BatchAlbumBox" Header="Album" />
+            </StackPanel>
+        </ContentDialog>
     </Grid>
 </Page>

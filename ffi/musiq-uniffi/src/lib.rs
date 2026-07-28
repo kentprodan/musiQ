@@ -41,6 +41,8 @@ pub enum MusiqError {
     InvalidPath { message: String },
     #[error("playback error: {message}")]
     Playback { message: String },
+    #[error("tag error: {message}")]
+    Tag { message: String },
 }
 
 impl From<CoreError> for MusiqError {
@@ -54,6 +56,7 @@ impl From<CoreError> for MusiqError {
             },
             CoreError::InvalidPath(p) => MusiqError::InvalidPath { message: p },
             CoreError::Playback(p) => MusiqError::Playback { message: p },
+            CoreError::Tag(p) => MusiqError::Tag { message: p },
         }
     }
 }
@@ -90,6 +93,20 @@ impl Library {
     pub fn list_scan_roots(&self) -> Result<Vec<String>, MusiqError> {
         let library = self.inner.lock().unwrap();
         Ok(library.list_scan_roots()?)
+    }
+
+    /// `Some(value)` sets that field on every track in `track_ids` (an empty
+    /// string clears it); `None` leaves it untouched. Returns the number of
+    /// tracks updated.
+    pub fn update_tags(
+        &self,
+        track_ids: Vec<String>,
+        title: Option<String>,
+        artist: Option<String>,
+        album: Option<String>,
+    ) -> Result<u32, MusiqError> {
+        let library = self.inner.lock().unwrap();
+        Ok(library.update_tags(&track_ids, title, artist, album)?)
     }
 }
 

@@ -7,6 +7,19 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Tag writing and batch editing
+
+### Added
+- **`core/musiq-core::tags`**: writes title/artist/album via `lofty` (`Tag::set_*`/`remove_*` + `save_to_path`), then mirrors the tag's final on-disk state back into the `tracks` row — the DB always reflects the file, not just what the caller asked to change. `Library::update_tags(track_ids, title, artist, album)` applies to one or many tracks in a single call: `Some(value)` sets a field (empty string clears it), `None` leaves it untouched. New `MusiqError::Tag` variant.
+- **`ffi/musiq-uniffi`**: mirrors `update_tags`, regenerated into the C# bindings.
+- **WinUI3 shell**:
+  - `TrackItem` now carries the track's DB id plus raw (un-fallback'd) title/artist/album, so edit dialogs can pre-fill honestly instead of writing UI placeholders like "Unknown Artist" into real files.
+  - **Library page**: a per-row Edit (pencil) button opens a `ContentDialog` to edit one track's Title/Artist/Album. The `ListView` is now `SelectionMode="Extended"` (click/ctrl-click/shift-click, no checkboxes — the documented desktop-appropriate mode) with an "Edit Selected…" button opening a second dialog that batch-writes Artist/Album (never Title) across the selection; a blank field there means "leave untouched," not "clear."
+- Verified end-to-end on the Windows desktop via computer-use, including confirming the write reaches the actual audio file (not just the DB) by rescanning the folder from disk after editing, and confirming the "clear" path (`remove_title`/`remove_artist`/`remove_album`) by blanking all fields and saving.
+
+### Descoped
+- File rename/move-on-disk from tag patterns (the other half of "Mp3Tag-parity: multi-file edit, rename patterns" from `TODO.md`) — out of scope for this pass, tracked separately in `TODO.md`.
+
 ## 2026-07-28 — Playback queue: next/previous, shuffle, repeat
 
 ### Added

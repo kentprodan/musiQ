@@ -63,6 +63,11 @@ internal sealed class LibraryService
     public Task<IReadOnlyList<string>> ListScanRootsAsync() =>
         Task.Run(() => (IReadOnlyList<string>)_library.ListScanRoots());
 
+    /// `null` leaves that field untouched on every track in `trackIds`; an
+    /// empty string clears it. Returns the number of tracks updated.
+    public Task<uint> UpdateTagsAsync(IReadOnlyList<string> trackIds, string? title, string? artist, string? album) =>
+        Task.Run(() => _library.UpdateTags(trackIds.ToArray(), title, artist, album));
+
     /// Replaces the queue with `tracks` and starts playing the one at `startIndex`.
     public async Task PlayQueueAsync(IReadOnlyList<TrackItem> tracks, int startIndex)
     {

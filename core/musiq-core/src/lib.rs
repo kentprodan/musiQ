@@ -7,6 +7,7 @@ mod db;
 mod error;
 mod player;
 mod scan;
+mod tags;
 
 pub use error::MusiqError;
 pub use player::{Player, RepeatMode};
@@ -68,6 +69,35 @@ impl Library {
             tracks.push(row?);
         }
         Ok(tracks)
+    }
+
+    /// Writes `title`/`artist`/`album` (each `Some` value sets that field —
+    /// an empty string clears it, `None` leaves it untouched) to every track
+    /// in `track_ids`, both on disk and in the library database. Returns the
+    /// number of tracks updated.
+    pub fn update_tags(
+        &self,
+        track_ids: &[String],
+        title: Option<String>,
+        artist: Option<String>,
+        album: Option<String>,
+    ) -> Result<u32, MusiqError> {
+        let update = tags::TagUpdate {
+            title,
+            artist,
+            album,
+        };
+        let mut count = 0u32;
+        for track_id in track_ids {
+            let path: String = self.conn.query_row(
+                "SELECT path FROM tracks WHERE id = ?1",
+                [track_id],
+                |row| row.get(0),
+            )?;
+            tags::update_track_tags(&self.conn, track_id, Path::new(&path), &update)?;
+            count += 1;
+        }
+        Ok(count)
     }
 
     /// Lists every folder that has been passed to `scan_folder`, in the order

@@ -11,11 +11,12 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 
 ## Core (Rust)
 
-- [ ] Tag *writing* / batch editing (Mp3Tag-parity: multi-file edit, rename patterns)
+- [x] Tag *writing* / batch editing (title/artist/album, single + multi-track) — rename-on-disk patterns (Mp3Tag's other half) still open, see below
 - [x] Audio playback engine (`rodio`) — single-track play/pause/resume/stop/volume
 - [x] Playback queue management (next/previous, shuffle, repeat) — auto-advance on natural track end still needs multi-track hardware verification (only tested with a 1-track library so far)
 - [ ] Plex client (`musiq-net` equivalent)
 - [ ] Subsonic/Navidrome client
+- [ ] File rename/move on disk from tag patterns (e.g. `{artist}/{album}/{title}`) — the Mp3Tag-parity feature explicitly descoped from the tag-writing pass above
 - [ ] Sandboxed plugin host (WASM, capability-scoped manifests)
 - [ ] Extend UniFFI contract as each of the above lands, regenerate Swift/Kotlin bindings alongside C#
 
@@ -36,5 +37,5 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [ ] Sources page: support remote sources (Plex/Subsonic/Navidrome), not just local scanned folders
 - [ ] Title bar: interactive content (e.g. search box) needs `InputNonClientPointerSource` passthrough regions
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)
-- [ ] Tag editing UI (once core batch-editing lands)
-- [ ] Library page: sorting/filtering, album art, multi-select
+- [x] Tag editing UI: per-track edit dialog + multi-select ("Extended" selection) batch-edit dialog
+- [ ] Library page: sorting/filtering, album art

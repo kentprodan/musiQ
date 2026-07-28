@@ -8,4 +8,6 @@ pub enum MusiqError {
     InvalidPath(String),
     #[error("playback error: {0}")]
     Playback(String),
+    #[error("tag error: {0}")]
+    Tag(String),
 }
