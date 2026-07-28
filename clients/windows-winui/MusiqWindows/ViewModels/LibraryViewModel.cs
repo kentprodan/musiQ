@@ -6,6 +6,14 @@ using uniffi.musiq_uniffi;
 
 namespace MusiqWindows.ViewModels;
 
+public enum TrackSortField
+{
+    Title,
+    Artist,
+    Album,
+    Duration,
+}
+
 public partial class LibraryViewModel : ObservableObject
 {
     [ObservableProperty]
@@ -14,6 +22,20 @@ public partial class LibraryViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "No folder scanned yet.";
 
+    [ObservableProperty]
+    private string _filterText = string.Empty;
+
+    [ObservableProperty]
+    private TrackSortField _sortField = TrackSortField.Title;
+
+    [ObservableProperty]
+    private bool _sortDescending;
+
+    // Backs `Tracks` (the filtered/sorted view the ListView and queueing both
+    // read from) — kept separate so re-applying the filter/sort doesn't need
+    // a round-trip to LibraryService.
+    private List<TrackItem> _allTracks = new();
+
     public ObservableCollection<TrackItem> Tracks { get; } = new();
 
     public LibraryViewModel()
@@ -21,15 +43,57 @@ public partial class LibraryViewModel : ObservableObject
         _ = RefreshAsync();
     }
 
+    partial void OnFilterTextChanged(string value) => ApplyFilterAndSort();
+
+    partial void OnSortFieldChanged(TrackSortField value) => ApplyFilterAndSort();
+
+    partial void OnSortDescendingChanged(bool value) => ApplyFilterAndSort();
+
     [RelayCommand]
     private async Task RefreshAsync()
     {
         var tracks = await LibraryService.Instance.ListTracksAsync();
+        var items = tracks.Select(TrackItem.From).ToList();
+
+        // Cache-first on the Rust side (a no-op file-exists check after the
+        // first extraction), so fetching every track's art in parallel here
+        // is cheap even for a large library.
+        var artByTrackId = (await Task.WhenAll(items.Select(async item =>
+        {
+            var path = await LibraryService.Instance.GetTrackArtPathAsync(item.Id);
+            return (item.Id, ArtUrl: path is null ? null : new Uri(path).AbsoluteUri);
+        }))).ToDictionary(pair => pair.Id, pair => pair.ArtUrl);
+
+        _allTracks = items
+            .Select(item => item with { ArtUrl = artByTrackId.GetValueOrDefault(item.Id) })
+            .ToList();
+        ApplyFilterAndSort();
+    }
+
+    private void ApplyFilterAndSort()
+    {
+        IEnumerable<TrackItem> query = _allTracks;
+
+        if (!string.IsNullOrWhiteSpace(FilterText))
+        {
+            query = query.Where(t =>
+                t.Title.Contains(FilterText, StringComparison.OrdinalIgnoreCase) ||
+                t.Artist.Contains(FilterText, StringComparison.OrdinalIgnoreCase) ||
+                t.Album.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
+        }
+
+        query = SortField switch
+        {
+            TrackSortField.Artist => SortDescending ? query.OrderByDescending(t => t.Artist) : query.OrderBy(t => t.Artist),
+            TrackSortField.Album => SortDescending ? query.OrderByDescending(t => t.Album) : query.OrderBy(t => t.Album),
+            TrackSortField.Duration => SortDescending ? query.OrderByDescending(t => t.DurationSecs ?? 0) : query.OrderBy(t => t.DurationSecs ?? 0),
+            _ => SortDescending ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
+        };
 
         Tracks.Clear();
-        foreach (var track in tracks)
+        foreach (var track in query)
         {
-            Tracks.Add(TrackItem.From(track));
+            Tracks.Add(track);
         }
     }
 

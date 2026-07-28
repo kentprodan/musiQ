@@ -34,6 +34,13 @@ public sealed record TrackItem(
     string? RawArtist,
     string? RawAlbum)
 {
+    /// Embedded cover art, as a `file:///`-style absolute URI string that
+    /// XAML's `Image.Source` converter can bind to directly. `null` for
+    /// Plex/Navidrome tracks (their album art is shown at the album level,
+    /// not per-track) or local tracks with no embedded picture.
+    public string? ArtUrl { get; init; }
+
+
     internal static TrackItem From(UniffiTrack track)
     {
         var title = string.IsNullOrWhiteSpace(track.Title)

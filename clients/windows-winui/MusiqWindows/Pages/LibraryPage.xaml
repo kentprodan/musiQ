@@ -21,6 +21,23 @@
             <Button x:Name="ScanFolderButton" Content="Scan Folder…" Click="ScanFolderButton_Click" />
             <Button x:Name="EditSelectedButton" Content="Edit Selected…" Click="EditSelectedButton_Click" />
             <Button x:Name="RenameSelectedButton" Content="Rename Selected…" Click="RenameSelectedButton_Click" />
+            <ComboBox
+                x:Name="SortFieldComboBox"
+                Header="Sort by"
+                SelectedIndex="0"
+                SelectionChanged="SortFieldComboBox_SelectionChanged">
+                <ComboBoxItem Content="Title" />
+                <ComboBoxItem Content="Artist" />
+                <ComboBoxItem Content="Album" />
+                <ComboBoxItem Content="Duration" />
+            </ComboBox>
+            <Button
+                x:Name="SortDirectionButton"
+                VerticalAlignment="Bottom"
+                Click="SortDirectionButton_Click"
+                ToolTipService.ToolTip="Toggle sort direction">
+                <FontIcon x:Name="SortDirectionIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE70E;" />
+            </Button>
             <ProgressRing IsActive="{x:Bind ViewModel.IsScanning, Mode=OneWay}" Width="20" Height="20" />
         </StackPanel>
 
@@ -31,6 +48,7 @@
                 <DataTemplate>
                     <Grid Padding="12,4" ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="3*" />
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="2*" />
@@ -38,10 +56,10 @@
                             <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Title" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="1" Text="Artist" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="2" Text="Album" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="3" Text="Duration" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1" Text="Title" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="2" Text="Artist" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="3" Text="Album" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="4" Text="Duration" FontWeight="SemiBold" />
                     </Grid>
                 </DataTemplate>
             </ListView.HeaderTemplate>
@@ -49,6 +67,7 @@
                 <DataTemplate x:DataType="viewmodels:TrackItem">
                     <Grid Padding="12,8" ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="3*" />
                             <ColumnDefinition Width="2*" />
                             <ColumnDefinition Width="2*" />
@@ -56,19 +75,25 @@
                             <ColumnDefinition Width="48" />
                             <ColumnDefinition Width="48" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{x:Bind Title}" />
-                        <TextBlock Grid.Column="1" Text="{x:Bind Artist}" />
-                        <TextBlock Grid.Column="2" Text="{x:Bind Album}" />
-                        <TextBlock Grid.Column="3" Text="{x:Bind Duration}" />
+                        <Image
+                            Grid.Column="0"
+                            Width="40"
+                            Height="40"
+                            Source="{x:Bind ArtUrl}"
+                            Stretch="UniformToFill" />
+                        <TextBlock Grid.Column="1" Text="{x:Bind Title}" />
+                        <TextBlock Grid.Column="2" Text="{x:Bind Artist}" />
+                        <TextBlock Grid.Column="3" Text="{x:Bind Album}" />
+                        <TextBlock Grid.Column="4" Text="{x:Bind Duration}" />
                         <Button
-                            Grid.Column="4"
+                            Grid.Column="5"
                             Padding="8,4"
                             Command="{Binding DataContext.PlayTrackCommand, ElementName=LibraryPageRoot}"
                             CommandParameter="{Binding}">
                             <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE768;" FontSize="12" />
                         </Button>
                         <Button
-                            Grid.Column="5"
+                            Grid.Column="6"
                             Padding="8,4"
                             Tag="{x:Bind}"
                             Click="EditTrackButton_Click">

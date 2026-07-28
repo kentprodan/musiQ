@@ -135,4 +135,22 @@ public sealed partial class LibraryPage : Page
 
         await ViewModel.SaveRenameAsync(selectedIds, folder.Path, RenamePatternBox.Text);
     }
+
+    private void SortFieldComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ViewModel.SortField = SortFieldComboBox.SelectedIndex switch
+        {
+            1 => TrackSortField.Artist,
+            2 => TrackSortField.Album,
+            3 => TrackSortField.Duration,
+            _ => TrackSortField.Title,
+        };
+    }
+
+    private void SortDirectionButton_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.SortDescending = !ViewModel.SortDescending;
+        // Segoe Fluent Icons: ChevronUp (ascending) / ChevronDown (descending).
+        SortDirectionIcon.Glyph = ViewModel.SortDescending ? "" : "";
+    }
 }

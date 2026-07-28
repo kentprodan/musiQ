@@ -3,6 +3,7 @@
 //! wraps this crate's public API for every native client (Swift/Kotlin/C#);
 //! this crate itself has no FFI-specific code in it.
 
+mod art;
 mod db;
 mod error;
 mod navidrome;
@@ -33,14 +34,20 @@ pub struct Track {
 
 pub struct Library {
     conn: Connection,
+    art_cache_dir: PathBuf,
 }
 
 impl Library {
     /// Opens (creating if absent) the SQLite database at `db_path` and ensures
-    /// its schema exists.
+    /// its schema exists. Extracted album art is cached in an `art-cache`
+    /// folder next to the database file.
     pub fn open(db_path: &Path) -> Result<Self, MusiqError> {
         let conn = db::open_connection(db_path)?;
-        Ok(Self { conn })
+        let art_cache_dir = db_path
+            .parent()
+            .map(|p| p.join("art-cache"))
+            .unwrap_or_else(|| PathBuf::from("art-cache"));
+        Ok(Self { conn, art_cache_dir })
     }
 
     /// Recursively scans `folder` for audio files, reads their tags, and
@@ -75,6 +82,19 @@ impl Library {
             tracks.push(row?);
         }
         Ok(tracks)
+    }
+
+    /// Returns a file path to `track_id`'s embedded cover art, extracting and
+    /// caching it on first request. `Ok(None)` means the track has no
+    /// embedded picture (not that it doesn't exist — an invalid `track_id`
+    /// surfaces as an error from the underlying row lookup).
+    pub fn track_art_path(&self, track_id: &str) -> Result<Option<String>, MusiqError> {
+        let path: String = self.conn.query_row(
+            "SELECT path FROM tracks WHERE id = ?1",
+            [track_id],
+            |row| row.get(0),
+        )?;
+        art::track_art_path(&self.art_cache_dir, track_id, Path::new(&path))
     }
 
     /// Writes `title`/`artist`/`album` (each `Some` value sets that field —

@@ -28,6 +28,16 @@
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="Assets/AppIcon.ico" />
             </TitleBar.IconSource>
+            <TitleBar.Content>
+                <AutoSuggestBox
+                    x:Name="LibrarySearchBox"
+                    MaxWidth="320"
+                    VerticalAlignment="Center"
+                    PlaceholderText="Search library"
+                    QueryIcon="Find"
+                    TextChanged="LibrarySearchBox_TextChanged"
+                    Visibility="Collapsed" />
+            </TitleBar.Content>
         </TitleBar>
 
         <NavigationView

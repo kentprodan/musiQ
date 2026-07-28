@@ -63,6 +63,11 @@ internal sealed class LibraryService
     public Task<IReadOnlyList<string>> ListScanRootsAsync() =>
         Task.Run(() => (IReadOnlyList<string>)_library.ListScanRoots());
 
+    /// A file path to `trackId`'s embedded cover art, or `null` if the file
+    /// has no embedded picture.
+    public Task<string?> GetTrackArtPathAsync(string trackId) =>
+        Task.Run(() => _library.TrackArtPath(trackId));
+
     /// `null` leaves that field untouched on every track in `trackIds`; an
     /// empty string clears it. Returns the number of tracks updated.
     public Task<uint> UpdateTagsAsync(IReadOnlyList<string> trackIds, string? title, string? artist, string? album) =>

@@ -104,6 +104,14 @@ impl Library {
         Ok(library.list_scan_roots()?)
     }
 
+    /// A file path to `track_id`'s embedded cover art (extracted from the
+    /// audio file and cached on first request), or `None` if it has no
+    /// embedded picture.
+    pub fn track_art_path(&self, track_id: String) -> Result<Option<String>, MusiqError> {
+        let library = self.inner.lock().unwrap();
+        Ok(library.track_art_path(&track_id)?)
+    }
+
     /// `Some(value)` sets that field on every track in `track_ids` (an empty
     /// string clears it); `None` leaves it untouched. Returns the number of
     /// tracks updated.
