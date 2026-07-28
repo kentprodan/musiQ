@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MusiqWindows.Services;
@@ -162,7 +163,8 @@ internal partial class SourcesViewModel : ObservableObject
         try
         {
             PlexStatusMessage = $"Playing \"{track.Title}\"…";
-            await PlexService.Instance.PlayTrackAsync(track);
+            var queue = PlexTracks.Select(t => t.Raw).ToList();
+            await PlexService.Instance.PlayTrackAsync(track, queue);
         }
         catch (MusiqException ex)
         {
@@ -262,7 +264,8 @@ internal partial class SourcesViewModel : ObservableObject
         try
         {
             NavidromeStatusMessage = $"Playing \"{song.Title}\"…";
-            await NavidromeService.Instance.PlayTrackAsync(song);
+            var queue = NavidromeSongs.Select(s => s.Raw).ToList();
+            await NavidromeService.Instance.PlayTrackAsync(song, queue);
         }
         catch (MusiqException ex)
         {

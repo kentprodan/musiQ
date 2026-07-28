@@ -1,4 +1,5 @@
 using MusiqWindows.ViewModels;
+using System.Linq;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
 using UniffiNavidromeClient = uniffi.musiq_uniffi.NavidromeClient;
 using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
@@ -8,8 +9,9 @@ namespace MusiqWindows.Services;
 
 /// <summary>
 /// Owns the current Navidrome/Subsonic-API server connection (if any).
-/// Mirrors <see cref="PlexService"/>: real streaming via
-/// <c>song.StreamUrl</c> (`format=raw`, fetched on demand), no download step.
+/// Mirrors <see cref="PlexService"/>: real streaming via each song's
+/// <c>StreamUrl</c> (`format=raw`, fetched on demand), and playing a song
+/// queues the rest of the currently-shown album/list around it.
 /// </summary>
 internal sealed class NavidromeService
 {
@@ -40,10 +42,14 @@ internal sealed class NavidromeService
     public Task<IReadOnlyList<UniffiNavidromeSong>> ListSongsAsync(string albumId) =>
         Task.Run(() => (IReadOnlyList<UniffiNavidromeSong>)RequireClient().ListSongs(albumId));
 
-    public Task PlayTrackAsync(UniffiNavidromeSong song)
+    /// Plays `song`, queuing the rest of `queueSongs` (the currently-shown
+    /// album's song list, in its displayed order) around it so Next/Previous
+    /// work across the whole album.
+    public Task PlayTrackAsync(UniffiNavidromeSong song, IReadOnlyList<UniffiNavidromeSong> queueSongs)
     {
-        var displayItem = TrackItem.FromNavidrome(song);
-        return LibraryService.Instance.PlayAdHocAsync(song.StreamUrl, displayItem);
+        var items = queueSongs.Select(TrackItem.FromNavidrome).ToList();
+        var startIndex = items.FindIndex(t => t.Id == song.Id);
+        return LibraryService.Instance.PlayQueueAsync(items, Math.Max(startIndex, 0));
     }
 
     private UniffiNavidromeClient RequireClient() =>

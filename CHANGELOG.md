@@ -7,6 +7,15 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Plex/Navidrome: queue support
+
+### Added
+- **WinUI3 shell**: playing a Plex or Navidrome track now loads the rest of the currently-shown list (a library's tracks, or an album's songs) as a real queue around it, instead of a length-1 ad-hoc queue — Next/Previous/shuffle/repeat and the "up next" list all work across a remote source now, the same as local playback. No `musiq-core`/UniFFI changes were needed: `Player::set_queue`/`play` already treat every queue entry as an opaque string and dispatch on the `http(s)://` prefix at play time, so a queue of stream URLs works through the exact same code path as a queue of local file paths.
+- `PlexService.PlayTrackAsync` and `NavidromeService.PlayTrackAsync` now take the full track/song list alongside the clicked one, and `LibraryService.PlayAdHocAsync` (the old length-1-queue path) was removed as unused.
+
+### Known limitation
+- Same caveat as the original streaming work: **not verified against a live Plex or Navidrome server** (none available in this environment). Verified only that this didn't regress local-library queue playback (build, launch, play, confirm the seek bar and up-next list behave as before).
+
 ## 2026-07-28 — Now Playing: click-to-jump on the up-next list
 
 ### Added

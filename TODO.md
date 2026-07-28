@@ -19,7 +19,7 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] Navidrome/Subsonic client (connect, browse folders → albums → songs, play) — real streaming (`format=raw` + range requests)
 - [x] Shared `HttpStreamReader` (`Read`+`Seek` over HTTP ranges) so both Plex and Navidrome feed rodio's decoder directly, matching local-file playback — **neither client has been verified against a live server** (none available in this environment); only each one's error path (unreachable host, timeout) was exercised end-to-end. JSON-parsing logic has unit-test coverage against each API's documented response shape.
 - [ ] **User to verify Plex + Navidrome against real servers** (connect, browse, play, confirm streaming actually starts before full download) — untested live as of 2026-07-28, see note above
-- [ ] Plex/Navidrome: queue support (currently a remote track plays solo, replacing whatever's in Now Playing — no next/previous across a remote library)
+- [x] Plex/Navidrome: queue support — playing a track queues the rest of the currently-shown library/album list around it (Next/Previous/shuffle/repeat all work), since `Player::set_queue` already treated paths generically and needed no core changes — **not yet verified against a live server**, see the verification item above
 - [ ] Navidrome: regenerate the salt/token pair periodically instead of once per connection (a minor, low-risk simplification for a self-hosted single-session client)
 - [ ] Sandboxed plugin host (WASM, capability-scoped manifests)
 - [ ] Extend UniFFI contract as each of the above lands, regenerate Swift/Kotlin bindings alongside C#
