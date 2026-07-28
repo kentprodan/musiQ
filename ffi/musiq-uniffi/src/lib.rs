@@ -418,6 +418,18 @@ impl From<musiq_core::NavidromeFolder> for NavidromeFolder {
 }
 
 #[derive(uniffi::Record)]
+pub struct NavidromeArtist {
+    pub id: String,
+    pub name: String,
+}
+
+impl From<musiq_core::NavidromeArtist> for NavidromeArtist {
+    fn from(a: musiq_core::NavidromeArtist) -> Self {
+        NavidromeArtist { id: a.id, name: a.name }
+    }
+}
+
+#[derive(uniffi::Record)]
 pub struct NavidromeAlbum {
     pub id: String,
     pub name: String,
@@ -486,10 +498,19 @@ impl NavidromeClient {
             .collect())
     }
 
-    pub fn list_albums(&self, folder_id: String) -> Result<Vec<NavidromeAlbum>, MusiqError> {
+    pub fn list_artists(&self, folder_id: String) -> Result<Vec<NavidromeArtist>, MusiqError> {
         Ok(self
             .inner
-            .list_albums(&folder_id)?
+            .list_artists(&folder_id)?
+            .into_iter()
+            .map(NavidromeArtist::from)
+            .collect())
+    }
+
+    pub fn list_albums(&self, artist_id: String) -> Result<Vec<NavidromeAlbum>, MusiqError> {
+        Ok(self
+            .inner
+            .list_albums(&artist_id)?
             .into_iter()
             .map(NavidromeAlbum::from)
             .collect())

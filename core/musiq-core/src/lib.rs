@@ -14,7 +14,7 @@ mod streaming;
 mod tags;
 
 pub use error::MusiqError;
-pub use navidrome::{NavidromeAlbum, NavidromeClient, NavidromeFolder, NavidromeSong};
+pub use navidrome::{NavidromeAlbum, NavidromeArtist, NavidromeClient, NavidromeFolder, NavidromeSong};
 pub use player::{Player, RepeatMode};
 pub use plex::{PlexAlbum, PlexArtist, PlexClient, PlexLibrary, PlexTrack};
 

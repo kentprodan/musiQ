@@ -7,6 +7,17 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Navidrome: browse by artist too, plus a reconnect-display bug fix
+
+### Added
+- **`core/musiq-core::navidrome`**: added artist grouping (`getArtists` → `getArtist`, ID3-tag based) between "music folder" and "album" — folder browsing was still capped at 500 albums flat per folder (`getAlbumList2`) with no artist grouping, the same scaling problem Plex's flat track list had. New `NavidromeArtist` type, 2 new unit tests (18/18 total in `musiq-core` now).
+- **`ffi/musiq-uniffi`**: mirrors `NavidromeArtist` and the new `list_artists`/`list_albums(artist_id)` split, regenerated into the C# bindings.
+- **WinUI3 Sources page**: Navidrome browsing now goes folder → artist → album → song (an "Artists" row inserted between "Folders" and "Albums").
+
+### Fixed
+- **Reconnect display bug**, found while verifying the above: navigating away from the Sources page and back showed "Not connected" with empty lists for Plex/Navidrome even when the connection was still live — `PlexService`/`NavidromeService` are app-lifetime singletons, but `SourcesPage` (and its `SourcesViewModel`) is recreated on every visit, and the page's auto-connect logic only handled the "not yet connected this session" case. Fixed by adding `RefreshPlexBrowseStateAsync`/`RefreshNavidromeBrowseStateAsync` to `SourcesViewModel`, which re-syncs the page's display from an already-live connection instead of reconnecting over the network. This directly affected the credential-persistence feature from earlier today, so it's fixed in the same pass rather than filed separately.
+- **Verified end-to-end** against the local HTTP stub (extended with fake `getArtists`/`getArtist` responses): browsed folder → artist → album → song, confirmed correct parsing, confirmed the reconnect bug's fix by connecting, navigating to Library and back to Sources, and confirming the connection and browse data were still shown (previously reset to "Not connected").
+
 ## 2026-07-28 — Plex: browse by artist/album instead of a flat track dump
 
 ### Added

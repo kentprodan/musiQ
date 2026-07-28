@@ -183,6 +183,20 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <TextBlock Text="Artists" Opacity="0.7" FontSize="12" />
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.NavidromeArtists}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding Name}" Tag="{Binding}" Click="NavidromeArtistButton_Click" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
                     <TextBlock Text="Albums" Opacity="0.7" FontSize="12" />
                     <ItemsControl ItemsSource="{x:Bind ViewModel.NavidromeAlbums}">
                         <ItemsControl.ItemsPanel>

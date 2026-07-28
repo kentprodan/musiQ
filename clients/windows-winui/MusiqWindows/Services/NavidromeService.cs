@@ -1,6 +1,7 @@
 using MusiqWindows.ViewModels;
 using System.Linq;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
+using UniffiNavidromeArtist = uniffi.musiq_uniffi.NavidromeArtist;
 using UniffiNavidromeClient = uniffi.musiq_uniffi.NavidromeClient;
 using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
 using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
@@ -48,8 +49,11 @@ internal sealed class NavidromeService
     public Task<IReadOnlyList<UniffiNavidromeFolder>> ListMusicFoldersAsync() =>
         Task.Run(() => (IReadOnlyList<UniffiNavidromeFolder>)RequireClient().ListMusicFolders());
 
-    public Task<IReadOnlyList<UniffiNavidromeAlbum>> ListAlbumsAsync(string folderId) =>
-        Task.Run(() => (IReadOnlyList<UniffiNavidromeAlbum>)RequireClient().ListAlbums(folderId));
+    public Task<IReadOnlyList<UniffiNavidromeArtist>> ListArtistsAsync(string folderId) =>
+        Task.Run(() => (IReadOnlyList<UniffiNavidromeArtist>)RequireClient().ListArtists(folderId));
+
+    public Task<IReadOnlyList<UniffiNavidromeAlbum>> ListAlbumsAsync(string artistId) =>
+        Task.Run(() => (IReadOnlyList<UniffiNavidromeAlbum>)RequireClient().ListAlbums(artistId));
 
     public Task<IReadOnlyList<UniffiNavidromeSong>> ListSongsAsync(string albumId) =>
         Task.Run(() => (IReadOnlyList<UniffiNavidromeSong>)RequireClient().ListSongs(albumId));

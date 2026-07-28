@@ -21,6 +21,11 @@ pub struct NavidromeFolder {
     pub name: String,
 }
 
+pub struct NavidromeArtist {
+    pub id: String,
+    pub name: String,
+}
+
 pub struct NavidromeAlbum {
     pub id: String,
     pub name: String,
@@ -141,26 +146,46 @@ impl NavidromeClient {
             .collect()
     }
 
-    pub fn list_albums(&self, folder_id: &str) -> Result<Vec<NavidromeAlbum>, MusiqError> {
-        let params = format!("type=alphabeticalByName&size=500&musicFolderId={folder_id}");
-        let response = self.get_json("getAlbumList2", &params)?;
-        Ok(Self::parse_albums(&response))
+    /// Lists the artists in `folder_id` (ID3-tag based grouping, via
+    /// `getArtists`) — the top of the browse hierarchy, rather than dumping
+    /// every album in the folder flat (`getAlbumList2` alone doesn't scale
+    /// past a small collection, same problem Plex's flat track listing had).
+    pub fn list_artists(&self, folder_id: &str) -> Result<Vec<NavidromeArtist>, MusiqError> {
+        let params = format!("musicFolderId={folder_id}");
+        let response = self.get_json("getArtists", &params)?;
+        Ok(Self::parse_artists(&response))
     }
 
-    fn parse_albums(response: &Value) -> Vec<NavidromeAlbum> {
-        response["albumList2"]["album"]
+    fn parse_artists(response: &Value) -> Vec<NavidromeArtist> {
+        response["artists"]["index"]
             .as_array()
             .cloned()
             .unwrap_or_default()
             .into_iter()
+            .flat_map(|index| index["artist"].as_array().cloned().unwrap_or_default())
             .filter_map(|a| {
-                Some(NavidromeAlbum {
+                Some(NavidromeArtist {
                     id: value_to_id_string(&a["id"])?,
-                    name: a["name"].as_str().unwrap_or("Untitled Album").to_string(),
-                    artist: a["artist"].as_str().map(|s| s.to_string()),
+                    name: a["name"].as_str().unwrap_or("Unknown Artist").to_string(),
                 })
             })
             .collect()
+    }
+
+    /// Lists the albums belonging to `artist_id` via `getArtist`.
+    pub fn list_albums(&self, artist_id: &str) -> Result<Vec<NavidromeAlbum>, MusiqError> {
+        let params = format!("id={artist_id}");
+        let response = self.get_json("getArtist", &params)?;
+        let items = response["artist"]["album"].as_array().cloned().unwrap_or_default();
+        Ok(items.into_iter().filter_map(Self::parse_album).collect())
+    }
+
+    fn parse_album(item: Value) -> Option<NavidromeAlbum> {
+        Some(NavidromeAlbum {
+            id: value_to_id_string(&item["id"])?,
+            name: item["name"].as_str().unwrap_or("Untitled Album").to_string(),
+            artist: item["artist"].as_str().map(|s| s.to_string()),
+        })
     }
 
     pub fn list_songs(&self, album_id: &str) -> Result<Vec<NavidromeSong>, MusiqError> {
@@ -241,19 +266,29 @@ mod tests {
     }
 
     #[test]
-    fn parses_albums() {
+    fn parses_artists_from_indexed_groups() {
         let response = ok_envelope(json!({
-            "albumList2": {
-                "album": [
-                    { "id": "al1", "name": "Back in Black", "artist": "AC/DC" }
+            "artists": {
+                "index": [
+                    { "name": "A", "artist": [{ "id": "ar1", "name": "AC/DC", "albumCount": 5 }] },
+                    { "name": "B", "artist": [{ "id": 2, "name": "Black Sabbath" }] },
                 ]
             }
         }));
 
-        let albums = NavidromeClient::parse_albums(&response);
-        assert_eq!(albums.len(), 1);
-        assert_eq!(albums[0].id, "al1");
-        assert_eq!(albums[0].artist.as_deref(), Some("AC/DC"));
+        let artists = NavidromeClient::parse_artists(&response);
+        assert_eq!(artists.len(), 2);
+        assert_eq!(artists[0].id, "ar1");
+        assert_eq!(artists[0].name, "AC/DC");
+        assert_eq!(artists[1].id, "2"); // numeric id coerced to string
+    }
+
+    #[test]
+    fn parses_albums_from_an_artists_album_list() {
+        let item = json!({ "id": "al1", "name": "Back in Black", "artist": "AC/DC" });
+        let album = NavidromeClient::parse_album(item).unwrap();
+        assert_eq!(album.id, "al1");
+        assert_eq!(album.artist.as_deref(), Some("AC/DC"));
     }
 
     #[test]

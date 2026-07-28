@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using MusiqWindows.Services;
 using uniffi.musiq_uniffi;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
+using UniffiNavidromeArtist = uniffi.musiq_uniffi.NavidromeArtist;
 using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
 using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
 using UniffiPlexAlbum = uniffi.musiq_uniffi.PlexAlbum;
@@ -79,6 +80,8 @@ internal partial class SourcesViewModel : ObservableObject
 
     public ObservableCollection<UniffiNavidromeFolder> NavidromeFolders { get; } = new();
 
+    public ObservableCollection<UniffiNavidromeArtist> NavidromeArtists { get; } = new();
+
     public ObservableCollection<UniffiNavidromeAlbum> NavidromeAlbums { get; } = new();
 
     public ObservableCollection<NavidromeSongDisplay> NavidromeSongs { get; } = new();
@@ -113,23 +116,49 @@ internal partial class SourcesViewModel : ObservableObject
         }
 
         IsConnectingToPlex = true;
-        PlexStatusMessage = "Connecting…";
+        try
+        {
+            PlexStatusMessage = "Connecting…";
+            await PlexService.Instance.ConnectAsync(baseUrl, token);
+            await RefreshPlexBrowseStateAsync();
+        }
+        catch (MusiqException ex)
+        {
+            PlexStatusMessage = $"Connection failed: {ex.Message}";
+        }
+        finally
+        {
+            IsConnectingToPlex = false;
+        }
+    }
+
+    /// Syncs this ViewModel's display state (libraries, status message) from
+    /// <see cref="PlexService"/>'s live connection — used both right after a
+    /// fresh <see cref="ConnectToPlexAsync"/> and when the Sources page is
+    /// recreated (e.g. navigating away and back) while a connection from an
+    /// earlier visit is still live, since the service is an app-lifetime
+    /// singleton but this ViewModel isn't.
+    public async Task RefreshPlexBrowseStateAsync()
+    {
+        if (!PlexService.Instance.IsConnected)
+        {
+            return;
+        }
+
         PlexLibraries.Clear();
         PlexArtists.Clear();
         PlexAlbums.Clear();
         PlexTracks.Clear();
+        IsPlexConnected = true;
 
         try
         {
-            await PlexService.Instance.ConnectAsync(baseUrl, token);
             var libraries = await PlexService.Instance.ListMusicLibrariesAsync();
 
             foreach (var library in libraries)
             {
                 PlexLibraries.Add(library);
             }
-
-            IsPlexConnected = true;
 
             if (libraries.Count == 0)
             {
@@ -146,10 +175,6 @@ internal partial class SourcesViewModel : ObservableObject
         catch (MusiqException ex)
         {
             PlexStatusMessage = $"Connection failed: {ex.Message}";
-        }
-        finally
-        {
-            IsConnectingToPlex = false;
         }
     }
 
@@ -254,22 +279,45 @@ internal partial class SourcesViewModel : ObservableObject
         }
 
         IsConnectingToNavidrome = true;
-        NavidromeStatusMessage = "Connecting…";
+        try
+        {
+            NavidromeStatusMessage = "Connecting…";
+            await NavidromeService.Instance.ConnectAsync(baseUrl, username, password);
+            await RefreshNavidromeBrowseStateAsync();
+        }
+        catch (MusiqException ex)
+        {
+            NavidromeStatusMessage = $"Connection failed: {ex.Message}";
+        }
+        finally
+        {
+            IsConnectingToNavidrome = false;
+        }
+    }
+
+    /// Syncs this ViewModel's display state from <see cref="NavidromeService"/>'s
+    /// live connection — same idea as <see cref="RefreshPlexBrowseStateAsync"/>.
+    public async Task RefreshNavidromeBrowseStateAsync()
+    {
+        if (!NavidromeService.Instance.IsConnected)
+        {
+            return;
+        }
+
         NavidromeFolders.Clear();
+        NavidromeArtists.Clear();
         NavidromeAlbums.Clear();
         NavidromeSongs.Clear();
+        IsNavidromeConnected = true;
 
         try
         {
-            await NavidromeService.Instance.ConnectAsync(baseUrl, username, password);
             var folders = await NavidromeService.Instance.ListMusicFoldersAsync();
 
             foreach (var folder in folders)
             {
                 NavidromeFolders.Add(folder);
             }
-
-            IsNavidromeConnected = true;
 
             if (folders.Count == 0)
             {
@@ -285,10 +333,6 @@ internal partial class SourcesViewModel : ObservableObject
         {
             NavidromeStatusMessage = $"Connection failed: {ex.Message}";
         }
-        finally
-        {
-            IsConnectingToNavidrome = false;
-        }
     }
 
     [RelayCommand]
@@ -296,6 +340,7 @@ internal partial class SourcesViewModel : ObservableObject
     {
         NavidromeService.Instance.Disconnect();
         NavidromeFolders.Clear();
+        NavidromeArtists.Clear();
         NavidromeAlbums.Clear();
         NavidromeSongs.Clear();
         IsNavidromeConnected = false;
@@ -305,10 +350,33 @@ internal partial class SourcesViewModel : ObservableObject
     public async Task LoadNavidromeFolderAsync(UniffiNavidromeFolder folder)
     {
         NavidromeStatusMessage = $"Loading \"{folder.Name}\"…";
+        NavidromeAlbums.Clear();
         NavidromeSongs.Clear();
         try
         {
-            var albums = await NavidromeService.Instance.ListAlbumsAsync(folder.Id);
+            var artists = await NavidromeService.Instance.ListArtistsAsync(folder.Id);
+
+            NavidromeArtists.Clear();
+            foreach (var artist in artists)
+            {
+                NavidromeArtists.Add(artist);
+            }
+
+            NavidromeStatusMessage = $"{folder.Name}: {artists.Count} artist(s). Pick one to see their albums.";
+        }
+        catch (MusiqException ex)
+        {
+            NavidromeStatusMessage = $"Failed to load folder: {ex.Message}";
+        }
+    }
+
+    public async Task LoadNavidromeArtistAsync(UniffiNavidromeArtist artist)
+    {
+        NavidromeStatusMessage = $"Loading \"{artist.Name}\"…";
+        NavidromeSongs.Clear();
+        try
+        {
+            var albums = await NavidromeService.Instance.ListAlbumsAsync(artist.Id);
 
             NavidromeAlbums.Clear();
             foreach (var album in albums)
@@ -316,11 +384,11 @@ internal partial class SourcesViewModel : ObservableObject
                 NavidromeAlbums.Add(album);
             }
 
-            NavidromeStatusMessage = $"{folder.Name}: {albums.Count} album(s). Pick one to see its songs.";
+            NavidromeStatusMessage = $"{artist.Name}: {albums.Count} album(s). Pick one to see its songs.";
         }
         catch (MusiqException ex)
         {
-            NavidromeStatusMessage = $"Failed to load folder: {ex.Message}";
+            NavidromeStatusMessage = $"Failed to load artist: {ex.Message}";
         }
     }
 
