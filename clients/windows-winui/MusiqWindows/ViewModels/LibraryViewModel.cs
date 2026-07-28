@@ -54,12 +54,16 @@ public partial class LibraryViewModel : ObservableObject
         }
     }
 
+    /// Plays `track` and queues the rest of the currently displayed list
+    /// after it, so Next/Previous on the Now Playing page have something to
+    /// move through.
     [RelayCommand]
     private async Task PlayTrackAsync(TrackItem track)
     {
         try
         {
-            await LibraryService.Instance.PlayTrackAsync(track);
+            var startIndex = Tracks.IndexOf(track);
+            await LibraryService.Instance.PlayQueueAsync(Tracks, startIndex);
         }
         catch (MusiqException ex)
         {

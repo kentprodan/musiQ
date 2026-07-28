@@ -7,6 +7,19 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Playback queue: next/previous, shuffle, repeat
+
+### Added
+- **`core/musiq-core::Player`**: queue support layered on top of single-track playback — `set_queue`, `next`/`previous`, `advance_if_finished` (polled, since rodio has no completion callback), `set_shuffle`/`is_shuffled`, `set_repeat_mode`/`repeat_mode` (`Off`/`All`/`One`), `queue_position`/`queue_len`. Shuffle keeps the current track in place and randomizes the rest (via `rand`); repeat-one replays the current track on natural completion, repeat-all wraps `next`/`previous` at the queue boundary, repeat-off stops there.
+- **`ffi/musiq-uniffi`**: mirrors the above (`RepeatMode` as a `uniffi::Enum`), regenerated into the C# bindings.
+- **WinUI3 shell**: `LibraryService` now drives the queue and polls `advance_if_finished` every 500ms via a `DispatcherQueueTimer` (per Microsoft's `DispatcherQueueTimer` reference) to auto-advance when a track ends on its own.
+  - **Library page**: the per-row Play button now queues the entire currently-displayed track list starting at that row, instead of playing a single track in isolation.
+  - **Now Playing page**: added Shuffle, Previous, Next, and Repeat (cycling Off → All → One) buttons, glyphs and codepoints from Microsoft's Segoe Fluent Icons reference, with opacity reflecting on/off state.
+- Verified end-to-end on the Windows desktop via computer-use: shuffle/repeat toggle correctly, repeat-all wraps Next/Previous instead of stopping, repeat-one/repeat-off correctly stop at the queue boundary. (Only one track exists in the scanned library on this machine, so true multi-track traversal and natural-end auto-advance weren't directly observed — the code path is shared with the verified wrap-around logic.)
+
+### Fixed
+- `NowPlayingViewModel` initially failed to compile (`CS0053`, inconsistent accessibility): the generated `RepeatMode` FFI enum is `internal`, but `[ObservableProperty]` generates a `public` property. Fixed by introducing a public `RepeatModeOption` wrapper enum in the ViewModel layer, mirroring how `TrackItem` already shields the FFI's `Track` type from XAML.
+
 ## 2026-07-28 — Audio playback engine + real Now Playing controls
 
 ### Added

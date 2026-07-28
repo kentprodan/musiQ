@@ -654,6 +654,7 @@ name = "musiq-core"
 version = "0.1.0"
 dependencies = [
  "lofty",
+ "rand",
  "rodio",
  "rusqlite",
  "tempfile",

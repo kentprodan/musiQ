@@ -23,6 +23,20 @@
 
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <Button
+                    Command="{x:Bind ViewModel.ToggleShuffleCommand}"
+                    Opacity="{x:Bind ViewModel.ShuffleOpacity, Mode=OneWay}"
+                    Width="40"
+                    HorizontalContentAlignment="Center">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE8B1;" FontSize="14" />
+                </Button>
+                <Button
+                    Command="{x:Bind ViewModel.PreviousCommand}"
+                    IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
+                    Width="40"
+                    HorizontalContentAlignment="Center">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE892;" FontSize="14" />
+                </Button>
+                <Button
                     Command="{x:Bind ViewModel.PlayPauseCommand}"
                     IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
                     Width="48"
@@ -30,11 +44,25 @@
                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}" />
                 </Button>
                 <Button
+                    Command="{x:Bind ViewModel.NextCommand}"
+                    IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
+                    Width="40"
+                    HorizontalContentAlignment="Center">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE893;" FontSize="14" />
+                </Button>
+                <Button
                     Command="{x:Bind ViewModel.StopCommand}"
                     IsEnabled="{x:Bind ViewModel.HasTrack, Mode=OneWay}"
-                    Width="48"
+                    Width="40"
                     HorizontalContentAlignment="Center">
-                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE71A;" />
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE71A;" FontSize="14" />
+                </Button>
+                <Button
+                    Command="{x:Bind ViewModel.CycleRepeatModeCommand}"
+                    Opacity="{x:Bind ViewModel.RepeatOpacity, Mode=OneWay}"
+                    Width="40"
+                    HorizontalContentAlignment="Center">
+                    <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{x:Bind ViewModel.RepeatGlyph, Mode=OneWay}" FontSize="14" />
                 </Button>
             </StackPanel>
         </StackPanel>

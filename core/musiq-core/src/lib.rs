@@ -9,7 +9,7 @@ mod player;
 mod scan;
 
 pub use error::MusiqError;
-pub use player::Player;
+pub use player::{Player, RepeatMode};
 
 use rusqlite::Connection;
 use std::path::Path;

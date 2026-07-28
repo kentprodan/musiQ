@@ -93,6 +93,33 @@ impl Library {
     }
 }
 
+#[derive(uniffi::Enum, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RepeatMode {
+    Off,
+    All,
+    One,
+}
+
+impl From<musiq_core::RepeatMode> for RepeatMode {
+    fn from(mode: musiq_core::RepeatMode) -> Self {
+        match mode {
+            musiq_core::RepeatMode::Off => RepeatMode::Off,
+            musiq_core::RepeatMode::All => RepeatMode::All,
+            musiq_core::RepeatMode::One => RepeatMode::One,
+        }
+    }
+}
+
+impl From<RepeatMode> for musiq_core::RepeatMode {
+    fn from(mode: RepeatMode) -> Self {
+        match mode {
+            RepeatMode::Off => musiq_core::RepeatMode::Off,
+            RepeatMode::All => musiq_core::RepeatMode::All,
+            RepeatMode::One => musiq_core::RepeatMode::One,
+        }
+    }
+}
+
 /// A handle to a single-track audio player. Wrapped in a `Mutex` for the same
 /// reason as `Library`: callers (C#/Swift/Kotlin) may hold this `Arc<Player>`
 /// across threads.
@@ -142,6 +169,49 @@ impl Player {
 
     pub fn current_track_path(&self) -> Option<String> {
         self.inner.lock().unwrap().current_track_path()
+    }
+
+    pub fn set_queue(&self, tracks: Vec<String>, start_index: u32) -> Result<(), MusiqError> {
+        let player = self.inner.lock().unwrap();
+        Ok(player.set_queue(tracks, start_index as usize)?)
+    }
+
+    pub fn next(&self) -> Result<bool, MusiqError> {
+        Ok(self.inner.lock().unwrap().next()?)
+    }
+
+    pub fn previous(&self) -> Result<bool, MusiqError> {
+        Ok(self.inner.lock().unwrap().previous()?)
+    }
+
+    /// Call periodically from the UI layer to auto-advance once the current
+    /// track finishes on its own — rodio has no completion callback.
+    pub fn advance_if_finished(&self) -> Result<bool, MusiqError> {
+        Ok(self.inner.lock().unwrap().advance_if_finished()?)
+    }
+
+    pub fn set_shuffle(&self, shuffle: bool) {
+        self.inner.lock().unwrap().set_shuffle(shuffle);
+    }
+
+    pub fn is_shuffled(&self) -> bool {
+        self.inner.lock().unwrap().is_shuffled()
+    }
+
+    pub fn set_repeat_mode(&self, mode: RepeatMode) {
+        self.inner.lock().unwrap().set_repeat_mode(mode.into());
+    }
+
+    pub fn repeat_mode(&self) -> RepeatMode {
+        self.inner.lock().unwrap().repeat_mode().into()
+    }
+
+    pub fn queue_position(&self) -> Option<u32> {
+        self.inner.lock().unwrap().queue_position()
+    }
+
+    pub fn queue_len(&self) -> u32 {
+        self.inner.lock().unwrap().queue_len()
     }
 }
 
