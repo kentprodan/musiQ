@@ -7,6 +7,15 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Plex/Navidrome: album art
+
+### Added
+- **`core/musiq-core::plex`**: `PlexAlbum` gained `art_url`, built from the album's `thumb` field the same way `stream_url` is built from a track's `Part.key` (relative path + `X-Plex-Token` query param).
+- **`core/musiq-core::navidrome`**: `NavidromeAlbum` gained `art_url`, built from the album's `coverArt` ID via Subsonic's `getCoverArt.view` endpoint (confirmed parameter shape against the OpenSubsonic API docs, since Navidrome has no bespoke documentation of its own).
+- **`ffi/musiq-uniffi`**: mirrors both, regenerated into the C# bindings.
+- **WinUI3 Sources page**: both album `ItemsControl`s now show an 80x80 cover art `Image` above the name/artist text. Confirmed via Microsoft's official Image/ImageBrush docs that `Image.Source` accepts an absolute URL string directly through XAML's built-in type converter — no `BitmapImage` construction needed, `Source="{Binding ArtUrl}"` just works.
+- **Verified visually**: extended the local HTTP stub to serve a real (solid-color, unambiguous) PNG at the Plex `thumb` and Navidrome `getCoverArt.view` URLs, then confirmed via screenshot that both album tiles render the actual served image, not a broken-image icon or blank box — proving the full pipeline (Rust URL construction → FFI → C# binding → XAML rendering) end-to-end.
+
 ## 2026-07-28 — Navidrome: browse by artist too, plus a reconnect-display bug fix
 
 ### Added

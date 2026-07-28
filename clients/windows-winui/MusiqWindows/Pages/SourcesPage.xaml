@@ -91,9 +91,10 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Tag="{Binding}" Click="PlexAlbumButton_Click">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" />
-                                        <TextBlock Text="{Binding Artist}" Opacity="0.7" FontSize="11" />
+                                    <StackPanel Spacing="4">
+                                        <Image Source="{Binding ArtUrl}" Width="80" Height="80" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Name}" MaxWidth="80" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Artist}" Opacity="0.7" FontSize="11" MaxWidth="80" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
@@ -207,9 +208,10 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Tag="{Binding}" Click="NavidromeAlbumButton_Click">
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" />
-                                        <TextBlock Text="{Binding Artist}" Opacity="0.7" FontSize="11" />
+                                    <StackPanel Spacing="4">
+                                        <Image Source="{Binding ArtUrl}" Width="80" Height="80" Stretch="UniformToFill" />
+                                        <TextBlock Text="{Binding Name}" MaxWidth="80" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Artist}" Opacity="0.7" FontSize="11" MaxWidth="80" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>

@@ -30,6 +30,7 @@ pub struct NavidromeAlbum {
     pub id: String,
     pub name: String,
     pub artist: Option<String>,
+    pub art_url: Option<String>,
 }
 
 pub struct NavidromeSong {
@@ -177,15 +178,27 @@ impl NavidromeClient {
         let params = format!("id={artist_id}");
         let response = self.get_json("getArtist", &params)?;
         let items = response["artist"]["album"].as_array().cloned().unwrap_or_default();
-        Ok(items.into_iter().filter_map(Self::parse_album).collect())
+        Ok(items.into_iter().filter_map(|item| self.parse_album(&item)).collect())
     }
 
-    fn parse_album(item: Value) -> Option<NavidromeAlbum> {
+    fn parse_album(&self, item: &Value) -> Option<NavidromeAlbum> {
         Some(NavidromeAlbum {
             id: value_to_id_string(&item["id"])?,
             name: item["name"].as_str().unwrap_or("Untitled Album").to_string(),
             artist: item["artist"].as_str().map(|s| s.to_string()),
+            art_url: item["coverArt"].as_str().map(|id| self.cover_art_url(id)),
         })
+    }
+
+    /// `getCoverArt` takes a coverArt ID (distinct from the album/song ID
+    /// itself, though Navidrome happens to reuse the same value) plus the
+    /// same auth params every other endpoint uses.
+    fn cover_art_url(&self, cover_art_id: &str) -> String {
+        format!(
+            "{}/rest/getCoverArt.view?{}&id={cover_art_id}&size=300",
+            self.base_url,
+            self.auth_query()
+        )
     }
 
     pub fn list_songs(&self, album_id: &str) -> Result<Vec<NavidromeSong>, MusiqError> {
@@ -285,10 +298,17 @@ mod tests {
 
     #[test]
     fn parses_albums_from_an_artists_album_list() {
-        let item = json!({ "id": "al1", "name": "Back in Black", "artist": "AC/DC" });
-        let album = NavidromeClient::parse_album(item).unwrap();
+        let client = NavidromeClient {
+            base_url: "http://navidrome.local:4533".to_string(),
+            username: "kent".to_string(),
+            salt: "abc123".to_string(),
+            token: "deadbeef".to_string(),
+        };
+        let item = json!({ "id": "al1", "name": "Back in Black", "artist": "AC/DC", "coverArt": "al1" });
+        let album = client.parse_album(&item).unwrap();
         assert_eq!(album.id, "al1");
         assert_eq!(album.artist.as_deref(), Some("AC/DC"));
+        assert!(album.art_url.unwrap().contains("getCoverArt.view?"));
     }
 
     #[test]

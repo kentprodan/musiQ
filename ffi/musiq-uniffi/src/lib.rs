@@ -311,6 +311,7 @@ pub struct PlexAlbum {
     pub rating_key: String,
     pub name: String,
     pub artist: Option<String>,
+    pub art_url: Option<String>,
 }
 
 impl From<musiq_core::PlexAlbum> for PlexAlbum {
@@ -319,6 +320,7 @@ impl From<musiq_core::PlexAlbum> for PlexAlbum {
             rating_key: a.rating_key,
             name: a.name,
             artist: a.artist,
+            art_url: a.art_url,
         }
     }
 }
@@ -434,6 +436,7 @@ pub struct NavidromeAlbum {
     pub id: String,
     pub name: String,
     pub artist: Option<String>,
+    pub art_url: Option<String>,
 }
 
 impl From<musiq_core::NavidromeAlbum> for NavidromeAlbum {
@@ -442,6 +445,7 @@ impl From<musiq_core::NavidromeAlbum> for NavidromeAlbum {
             id: a.id,
             name: a.name,
             artist: a.artist,
+            art_url: a.art_url,
         }
     }
 }

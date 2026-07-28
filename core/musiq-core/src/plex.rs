@@ -30,6 +30,7 @@ pub struct PlexAlbum {
     pub rating_key: String,
     pub name: String,
     pub artist: Option<String>,
+    pub art_url: Option<String>,
 }
 
 pub struct PlexTrack {
@@ -132,18 +133,25 @@ impl PlexClient {
         let json = self.get_json(&path)?;
         Ok(Self::items_of(&json)
             .into_iter()
-            .filter_map(Self::parse_album)
+            .filter_map(|item| self.parse_album(&item))
             .collect())
     }
 
-    fn parse_album(item: Value) -> Option<PlexAlbum> {
+    fn parse_album(&self, item: &Value) -> Option<PlexAlbum> {
         Some(PlexAlbum {
             rating_key: item["ratingKey"].as_str()?.to_string(),
             name: item["title"].as_str().unwrap_or("Untitled Album").to_string(),
             // The album's own parent is its artist, so (just like a track's
             // `parentTitle` is its album) an album's `parentTitle` is its artist.
             artist: item["parentTitle"].as_str().map(|s| s.to_string()),
+            art_url: item["thumb"].as_str().map(|thumb| self.art_url(thumb)),
         })
+    }
+
+    /// Builds a full, authenticated URL for a `thumb`/cover-art relative
+    /// path, the same auth pattern `parse_track` uses for stream URLs.
+    fn art_url(&self, thumb_path: &str) -> String {
+        format!("{}{}?X-Plex-Token={}", self.base_url, thumb_path, self.token)
     }
 
     /// Lists the tracks belonging to `album_rating_key` via the same
@@ -259,11 +267,21 @@ mod tests {
 
     #[test]
     fn parses_an_album_with_its_artist_from_parent_title() {
-        let item = json!({ "ratingKey": "alb1", "title": "Back in Black", "parentTitle": "AC/DC" });
-        let album = PlexClient::parse_album(item).unwrap();
+        let client = PlexClient::new("http://plex.local:32400".to_string(), "tok".to_string());
+        let item = json!({
+            "ratingKey": "alb1",
+            "title": "Back in Black",
+            "parentTitle": "AC/DC",
+            "thumb": "/library/metadata/alb1/thumb/162"
+        });
+        let album = client.parse_album(&item).unwrap();
         assert_eq!(album.rating_key, "alb1");
         assert_eq!(album.name, "Back in Black");
         assert_eq!(album.artist.as_deref(), Some("AC/DC"));
+        assert_eq!(
+            album.art_url.as_deref(),
+            Some("http://plex.local:32400/library/metadata/alb1/thumb/162?X-Plex-Token=tok")
+        );
     }
 
     #[test]

@@ -38,11 +38,12 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] Now Playing page: Shuffle/Previous/Next/Repeat controls wired to the queue engine
 - [x] Now Playing: "up next" queue list view, current track highlighted, shuffle-aware (reads the queue's actual play order, not just the original list)
 - [x] Now Playing: seek bar / elapsed-time display — real drag-to-seek (`rodio::Player::try_seek`), not just read-only progress
-- [x] Sources page: Plex connection (server URL + token, library list, track list with Play)
-- [x] Sources page: Navidrome connection (server URL + username/password, folder → album → song browsing, Play)
+- [x] Sources page: Plex connection (server URL + token, library → artist → album → track browsing, Play)
+- [x] Sources page: Navidrome connection (server URL + username/password, folder → artist → album → song browsing, Play)
+- [x] Sources page: album art for Plex (`thumb`) and Navidrome (`getCoverArt`) album listings
 - [x] Plex/Navidrome: remember the connection (server URL + token/username/password) in Windows' Credential Locker (`PasswordVault`) and reconnect automatically on launch, with a "Forget" button to clear it
 - [ ] Title bar: interactive content (e.g. search box) needs `InputNonClientPointerSource` passthrough regions
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)
 - [x] Tag editing UI: per-track edit dialog + multi-select ("Extended" selection) batch-edit dialog
-- [ ] Library page: sorting/filtering, album art
+- [ ] Library page: sorting/filtering, album art (local files only — Plex/Navidrome album art is done, see Core section)
 - [x] Now Playing: click a track in "up next" to jump straight to it (`Player::play_at` jumps to any index in the current play order)
