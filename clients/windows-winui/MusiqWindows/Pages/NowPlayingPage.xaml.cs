@@ -45,4 +45,12 @@ public sealed partial class NowPlayingPage : Page
         _isSeeking = false;
         await ViewModel.SeekAsync(PositionSlider.Value);
     }
+
+    private async void UpNextListView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is QueueItemDisplay item)
+        {
+            await ViewModel.PlayQueueItemAsync(item.Track);
+        }
+    }
 }

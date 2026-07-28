@@ -191,6 +191,25 @@ impl Player {
         self.advance(-1)
     }
 
+    /// Jumps directly to `track_index` (an index into the *original*
+    /// unshuffled track list, same indexing as `queue_order`) — for an
+    /// "up next" list where the user picks a specific track rather than
+    /// stepping relatively. Returns `false` if there's no queue or
+    /// `track_index` isn't in it.
+    pub fn play_at(&self, track_index: u32) -> Result<bool, MusiqError> {
+        let path = {
+            let mut queue = self.queue.lock().unwrap();
+            let Some(pos) = queue.play_order.iter().position(|&i| i as u32 == track_index) else {
+                return Ok(false);
+            };
+            queue.position = Some(pos);
+            queue.tracks[track_index as usize].clone()
+        };
+
+        self.play(&path)?;
+        Ok(true)
+    }
+
     fn advance(&self, delta: isize) -> Result<bool, MusiqError> {
         let path = {
             let mut queue = self.queue.lock().unwrap();

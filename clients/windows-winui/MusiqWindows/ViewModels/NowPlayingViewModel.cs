@@ -150,6 +150,12 @@ public partial class NowPlayingViewModel : ObservableObject
     public Task SeekAsync(double seconds) =>
         LibraryService.Instance.SeekAsync(seconds);
 
+    public async Task PlayQueueItemAsync(TrackItem track)
+    {
+        await LibraryService.Instance.PlayQueueItemAsync(track);
+        IsPaused = false;
+    }
+
     private async Task RefreshQueueControlsAsync()
     {
         IsShuffled = await LibraryService.Instance.IsShuffledAsync();

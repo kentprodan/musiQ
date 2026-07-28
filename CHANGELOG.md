@@ -7,6 +7,14 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Now Playing: click-to-jump on the up-next list
+
+### Added
+- **`core/musiq-core::Player::play_at(track_index)`**: jumps directly to any track in the current play order (looked up by its position within `play_order`, so it respects shuffle) instead of only stepping relatively via `next`/`previous`. Returns `false` if the index isn't in the queue rather than erroring, since a stale click (queue changed since the row was rendered) is an expected no-op, not a failure.
+- **`ffi/musiq-uniffi`**: mirrors `play_at`, regenerated into the C# bindings.
+- **WinUI3 Now Playing page**: the "up next" `ListView` is now clickable (`IsItemClickEnabled`) — tapping a row calls `LibraryService.PlayQueueItemAsync`, which resolves the clicked track back to its queue index and calls `play_at`.
+- Verified end-to-end on the Windows desktop: with a track partway through playback, clicking its own row in "up next" restarted it from 0:00 and playback continued counting up normally afterward.
+
 ## 2026-07-28 — Now Playing: seek bar and up-next queue list
 
 ### Added

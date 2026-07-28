@@ -44,4 +44,4 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)
 - [x] Tag editing UI: per-track edit dialog + multi-select ("Extended" selection) batch-edit dialog
 - [ ] Library page: sorting/filtering, album art
-- [ ] Now Playing: click a track in "up next" to jump straight to it (currently display-only — no direct-jump Player method exists yet, only relative next/previous)
+- [x] Now Playing: click a track in "up next" to jump straight to it (`Player::play_at` jumps to any index in the current play order)

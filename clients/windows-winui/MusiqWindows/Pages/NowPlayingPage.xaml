@@ -85,7 +85,12 @@
 
             <StackPanel Spacing="8" MaxWidth="480" HorizontalAlignment="Left">
                 <TextBlock Text="Up next" Style="{StaticResource SubtitleTextBlockStyle}" FontSize="16" />
-                <ListView ItemsSource="{x:Bind ViewModel.UpNext}" SelectionMode="None" Height="280">
+                <ListView
+                    ItemsSource="{x:Bind ViewModel.UpNext}"
+                    SelectionMode="None"
+                    IsItemClickEnabled="True"
+                    ItemClick="UpNextListView_ItemClick"
+                    Height="280">
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="viewmodels:QueueItemDisplay">
                             <Grid Padding="8,6" ColumnSpacing="8">

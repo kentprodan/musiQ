@@ -94,6 +94,21 @@ internal sealed class LibraryService
         RefreshCurrentTrackFromQueue();
     }
 
+    /// Jumps directly to `item` within the current queue (e.g. the user
+    /// tapped a row in an "up next" list) — a no-op if `item` isn't in the
+    /// queue (already stopped/replaced by the time the tap registered).
+    public async Task PlayQueueItemAsync(TrackItem item)
+    {
+        var index = _queueTracks.FindIndex(t => t.Id == item.Id);
+        if (index < 0)
+        {
+            return;
+        }
+
+        await Task.Run(() => _player.PlayAt((uint)index));
+        RefreshCurrentTrackFromQueue();
+    }
+
     public async Task NextAsync()
     {
         await Task.Run(() => _player.Next());

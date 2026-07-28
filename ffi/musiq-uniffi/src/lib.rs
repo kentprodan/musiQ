@@ -225,6 +225,12 @@ impl Player {
         Ok(self.inner.lock().unwrap().previous()?)
     }
 
+    /// Jumps directly to `track_index` (an index into the original track
+    /// list, same indexing as `queue_order`) — for an "up next" list.
+    pub fn play_at(&self, track_index: u32) -> Result<bool, MusiqError> {
+        Ok(self.inner.lock().unwrap().play_at(track_index)?)
+    }
+
     /// Call periodically from the UI layer to auto-advance once the current
     /// track finishes on its own — rodio has no completion callback.
     pub fn advance_if_finished(&self) -> Result<bool, MusiqError> {
