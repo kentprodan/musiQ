@@ -12,4 +12,6 @@ pub enum MusiqError {
     Tag(String),
     #[error("rename error: {0}")]
     Rename(String),
+    #[error("plex error: {0}")]
+    Plex(String),
 }

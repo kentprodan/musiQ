@@ -7,6 +7,18 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Plex client
+
+### Added
+- **`core/musiq-core::plex`**: a minimal client for a self-hosted Plex Media Server, built on `ureq` + `serde_json` (no official Rust SDK exists, and responses are parsed field-by-field via `serde_json::Value` rather than strict structs, so one unexpected field doesn't break parsing of every other track). `PlexClient::test_connection`/`list_music_libraries`/`list_tracks`/`download_track`. Auth via `X-Plex-Token` header; JSON responses via `Accept: application/json` (Plex defaults to XML). New `MusiqError::Plex` variant.
+- **`ffi/musiq-uniffi`**: mirrors `PlexClient`, `PlexTrack`, `PlexLibrary`, regenerated into the C# bindings.
+- **WinUI3 shell**: the Sources page gets a "Plex" section — server URL + token (`PasswordBox`, since a Plex token is a credential) to connect, then a list of music libraries and a track list with a Play button per row.
+- Playback works by **downloading a track to a temp file, then handing it to the existing local-file `Player`** (reusing 100% of the queue/pause/stop machinery — a Plex track is technically a length-1 queue). This is a deliberate simplification: there's no true progressive streaming yet, so playback doesn't start until the whole file has downloaded. Tracked as a follow-up in `TODO.md`, along with queue support for Plex libraries (currently a Plex track plays solo).
+- 10 unit tests for the JSON-parsing logic (well-formed tracks, missing artist/album, tracks with no playable media, section-type filtering) using fixture JSON built from Plex's documented response shape.
+
+### Known limitation
+- **Not verified against a live Plex Media Server** — none was available in this environment/session. Only the failure path (unreachable host → timeout → clean error surfaced in the UI, no crash) was exercised end-to-end on the Windows desktop. The JSON-parsing logic is unit-tested against the documented API shape, but the actual endpoints, field names, and auth flow haven't been confirmed against a real server's real response. Treat this as implemented-but-unverified until someone with a real Plex server tries it.
+
 ## 2026-07-28 — Rename on disk (Mp3Tag-parity complete)
 
 ### Added

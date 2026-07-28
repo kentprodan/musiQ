@@ -1,11 +1,13 @@
+using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 using UniffiTrack = uniffi.musiq_uniffi.Track;
 
 namespace MusiqWindows.ViewModels;
 
 /// <summary>
-/// Flat, pre-formatted view of a <see cref="UniffiTrack"/> for display in
-/// <c>LibraryPage</c>'s <c>ListView</c>. Exists so XAML never has to deal
-/// with the FFI record's nullable fields or raw seconds directly.
+/// Flat, pre-formatted view of a track for display, whether it came from the
+/// local library (<see cref="UniffiTrack"/>) or a Plex server
+/// (<see cref="UniffiPlexTrack"/>). Exists so XAML never has to deal with
+/// nullable fields or raw seconds directly.
 ///
 /// <c>Title</c>/<c>Artist</c>/<c>Album</c> are display strings with
 /// placeholder fallbacks baked in ("Unknown Artist" etc) — the tag-edit
@@ -29,19 +31,35 @@ public sealed record TrackItem(
             ? System.IO.Path.GetFileNameWithoutExtension(track.Path)
             : track.Title!;
 
-        var duration = track.DurationSecs is uint secs
-            ? $"{secs / 60}:{secs % 60:D2}"
-            : "--:--";
-
         return new TrackItem(
             Id: track.Id,
             Title: title,
             Artist: track.Artist ?? "Unknown Artist",
             Album: track.Album ?? "Unknown Album",
-            Duration: duration,
+            Duration: FormatDuration(track.DurationSecs),
             Path: track.Path,
             RawTitle: track.Title,
             RawArtist: track.Artist,
             RawAlbum: track.Album);
     }
+
+    /// <param name="localPath">Where the track was (or will be) downloaded to —
+    /// Plex playback works by downloading to a temp file and playing that,
+    /// same as any other local file.</param>
+    internal static TrackItem FromPlex(UniffiPlexTrack track, string localPath)
+    {
+        return new TrackItem(
+            Id: track.RatingKey,
+            Title: string.IsNullOrWhiteSpace(track.Title) ? "Untitled" : track.Title,
+            Artist: track.Artist ?? "Unknown Artist",
+            Album: track.Album ?? "Unknown Album",
+            Duration: FormatDuration(track.DurationSecs),
+            Path: localPath,
+            RawTitle: track.Title,
+            RawArtist: track.Artist,
+            RawAlbum: track.Album);
+    }
+
+    private static string FormatDuration(uint? secs) =>
+        secs is uint value ? $"{value / 60}:{value % 60:D2}" : "--:--";
 }

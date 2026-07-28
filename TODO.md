@@ -15,7 +15,9 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] File rename/move on disk from tag patterns (`{artist}/{album}/{title}`-style, sanitized, subfolder-creating) — full Mp3Tag-parity feature now done
 - [x] Audio playback engine (`rodio`) — single-track play/pause/resume/stop/volume
 - [x] Playback queue management (next/previous, shuffle, repeat) — auto-advance on natural track end still needs multi-track hardware verification (only tested with a 1-track library so far)
-- [ ] Plex client (`musiq-net` equivalent) — up next
+- [x] Plex client (connect, browse music libraries, play tracks) — **not verified against a live Plex server** (none available in this environment); only the error path (unreachable host, timeout) was exercised end-to-end. Playback is download-then-play, not true progressive streaming — see below.
+- [ ] Plex: true streaming (progressive download / HTTP range requests feeding the decoder) instead of downloading the whole file before playback starts
+- [ ] Plex: queue support (currently a Plex track plays solo, replacing whatever's in Now Playing — no next/previous across a Plex library)
 - [ ] Subsonic/Navidrome client
 - [ ] Sandboxed plugin host (WASM, capability-scoped manifests)
 - [ ] Extend UniFFI contract as each of the above lands, regenerate Swift/Kotlin bindings alongside C#
@@ -34,7 +36,7 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] Now Playing page: Shuffle/Previous/Next/Repeat controls wired to the queue engine
 - [ ] Now Playing: "up next" queue list view (queue exists in the core/FFI layer, no visual list yet)
 - [ ] Now Playing: seek bar / elapsed-time display (rodio's `get_pos` is available, not wired up yet)
-- [ ] Sources page: support remote sources (Plex/Subsonic/Navidrome), not just local scanned folders
+- [x] Sources page: Plex connection (server URL + token, library list, track list with Play) — Subsonic/Navidrome still open
 - [ ] Title bar: interactive content (e.g. search box) needs `InputNonClientPointerSource` passthrough regions
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)
 - [x] Tag editing UI: per-track edit dialog + multi-select ("Extended" selection) batch-edit dialog

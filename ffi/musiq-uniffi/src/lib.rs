@@ -45,6 +45,8 @@ pub enum MusiqError {
     Tag { message: String },
     #[error("rename error: {message}")]
     Rename { message: String },
+    #[error("plex error: {message}")]
+    Plex { message: String },
 }
 
 impl From<CoreError> for MusiqError {
@@ -60,6 +62,7 @@ impl From<CoreError> for MusiqError {
             CoreError::Playback(p) => MusiqError::Playback { message: p },
             CoreError::Tag(p) => MusiqError::Tag { message: p },
             CoreError::Rename(p) => MusiqError::Rename { message: p },
+            CoreError::Plex(p) => MusiqError::Plex { message: p },
         }
     }
 }
@@ -245,6 +248,107 @@ impl Player {
 
     pub fn queue_len(&self) -> u32 {
         self.inner.lock().unwrap().queue_len()
+    }
+}
+
+#[derive(uniffi::Record)]
+pub struct PlexLibrary {
+    pub key: String,
+    pub title: String,
+}
+
+impl From<musiq_core::PlexLibrary> for PlexLibrary {
+    fn from(l: musiq_core::PlexLibrary) -> Self {
+        PlexLibrary {
+            key: l.key,
+            title: l.title,
+        }
+    }
+}
+
+#[derive(uniffi::Record)]
+pub struct PlexTrack {
+    pub rating_key: String,
+    pub title: String,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub duration_secs: Option<u32>,
+    pub stream_url: String,
+    pub file_extension: String,
+}
+
+impl From<musiq_core::PlexTrack> for PlexTrack {
+    fn from(t: musiq_core::PlexTrack) -> Self {
+        PlexTrack {
+            rating_key: t.rating_key,
+            title: t.title,
+            artist: t.artist,
+            album: t.album,
+            duration_secs: t.duration_secs,
+            stream_url: t.stream_url,
+            file_extension: t.file_extension,
+        }
+    }
+}
+
+impl From<PlexTrack> for musiq_core::PlexTrack {
+    fn from(t: PlexTrack) -> Self {
+        musiq_core::PlexTrack {
+            rating_key: t.rating_key,
+            title: t.title,
+            artist: t.artist,
+            album: t.album,
+            duration_secs: t.duration_secs,
+            stream_url: t.stream_url,
+            file_extension: t.file_extension,
+        }
+    }
+}
+
+/// A connection to a self-hosted Plex Media Server. Holds no interior
+/// mutability (just a base URL and a token), so unlike `Library`/`Player`
+/// there's no `Mutex` to wrap — it's `Send + Sync` on its own.
+#[derive(uniffi::Object)]
+pub struct PlexClient {
+    inner: musiq_core::PlexClient,
+}
+
+#[uniffi::export]
+impl PlexClient {
+    #[uniffi::constructor]
+    pub fn new(base_url: String, token: String) -> Arc<Self> {
+        Arc::new(Self {
+            inner: musiq_core::PlexClient::new(base_url, token),
+        })
+    }
+
+    pub fn test_connection(&self) -> Result<(), MusiqError> {
+        Ok(self.inner.test_connection()?)
+    }
+
+    pub fn list_music_libraries(&self) -> Result<Vec<PlexLibrary>, MusiqError> {
+        Ok(self
+            .inner
+            .list_music_libraries()?
+            .into_iter()
+            .map(PlexLibrary::from)
+            .collect())
+    }
+
+    pub fn list_tracks(&self, section_key: String) -> Result<Vec<PlexTrack>, MusiqError> {
+        Ok(self
+            .inner
+            .list_tracks(&section_key)?
+            .into_iter()
+            .map(PlexTrack::from)
+            .collect())
+    }
+
+    /// Downloads `track` into `dest_dir`, returning the local file path.
+    pub fn download_track(&self, track: PlexTrack, dest_dir: String) -> Result<String, MusiqError> {
+        let core_track: musiq_core::PlexTrack = track.into();
+        let path = self.inner.download_track(&core_track, &PathBuf::from(dest_dir))?;
+        Ok(path.to_string_lossy().into_owned())
     }
 }
 

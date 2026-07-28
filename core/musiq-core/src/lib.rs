@@ -6,12 +6,14 @@
 mod db;
 mod error;
 mod player;
+mod plex;
 mod rename;
 mod scan;
 mod tags;
 
 pub use error::MusiqError;
 pub use player::{Player, RepeatMode};
+pub use plex::{PlexClient, PlexLibrary, PlexTrack};
 
 use rusqlite::Connection;
 use std::path::{Path, PathBuf};

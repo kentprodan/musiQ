@@ -83,6 +83,17 @@ internal sealed class LibraryService
         RefreshCurrentTrackFromQueue();
     }
 
+    /// Plays a single track outside the local library — e.g. a downloaded
+    /// Plex track. Implemented as a length-1 queue so the existing
+    /// Play/Pause/Stop/Next/Previous UI and auto-advance polling all keep
+    /// working unchanged; "next" on a single-item queue just ends it.
+    public async Task PlayAdHocAsync(string localPath, TrackItem displayItem)
+    {
+        _queueTracks = new List<TrackItem> { displayItem };
+        await Task.Run(() => _player.SetQueue(new[] { localPath }, 0));
+        RefreshCurrentTrackFromQueue();
+    }
+
     public async Task NextAsync()
     {
         await Task.Run(() => _player.Next());
