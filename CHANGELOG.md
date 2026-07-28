@@ -7,6 +7,14 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Plex: browse by artist/album instead of a flat track dump
+
+### Added
+- **`core/musiq-core::plex`**: replaced `list_tracks(section)` (every track in a library, flat — thousands of rows for a real collection) with `list_artists(section)` → `list_albums(artist_rating_key)` → `list_tracks(album_rating_key)`, mirroring both Plex's own client hierarchy and how Navidrome browsing already worked here. Uses Plex's numeric metadata types (`type=8`/`9`/`10` for artist/album/track — confirmed against python-plexapi's source, since Plex has no official schema) and its generic `/library/metadata/{ratingKey}/children` endpoint for listing an item's children (also confirmed there, since the previously-used `/all?type=N` form doesn't apply once you're inside a specific artist/album). New `PlexArtist`/`PlexAlbum` types, 2 new unit tests.
+- **`ffi/musiq-uniffi`**: mirrors `PlexArtist`/`PlexAlbum` and the new three-step `list_artists`/`list_albums`/`list_tracks`, regenerated into the C# bindings.
+- **WinUI3 Sources page**: Plex browsing now goes library → artists → albums → tracks (an "Artists" and "Albums" row, same layout Navidrome's folder/album rows already used) instead of dumping a library's whole track list into one screen.
+- **Verified end-to-end** against an extended version of the local HTTP stub (now serving fake artist/album/track JSON matching Plex's real response shape) since no live Plex server is available: connected, browsed artist → album → track, confirmed correct field parsing (including ms→seconds duration conversion), clicked Play, and confirmed the track was correctly queued end-to-end down into the Rust `Player`'s actual queue state (visible in the Now Playing page's "up next" list) — actual audio playback itself wasn't exercised since the stub serves JSON, not real audio, which is outside what this stub is for (real decoding was verified with real audio files in earlier work).
+
 ## 2026-07-28 — Plex/Navidrome: remember the connection across restarts
 
 ### Added

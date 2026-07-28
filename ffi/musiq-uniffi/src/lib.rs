@@ -292,6 +292,38 @@ impl From<musiq_core::PlexLibrary> for PlexLibrary {
 }
 
 #[derive(uniffi::Record)]
+pub struct PlexArtist {
+    pub rating_key: String,
+    pub name: String,
+}
+
+impl From<musiq_core::PlexArtist> for PlexArtist {
+    fn from(a: musiq_core::PlexArtist) -> Self {
+        PlexArtist {
+            rating_key: a.rating_key,
+            name: a.name,
+        }
+    }
+}
+
+#[derive(uniffi::Record)]
+pub struct PlexAlbum {
+    pub rating_key: String,
+    pub name: String,
+    pub artist: Option<String>,
+}
+
+impl From<musiq_core::PlexAlbum> for PlexAlbum {
+    fn from(a: musiq_core::PlexAlbum) -> Self {
+        PlexAlbum {
+            rating_key: a.rating_key,
+            name: a.name,
+            artist: a.artist,
+        }
+    }
+}
+
+#[derive(uniffi::Record)]
 pub struct PlexTrack {
     pub rating_key: String,
     pub title: String,
@@ -344,10 +376,29 @@ impl PlexClient {
             .collect())
     }
 
-    pub fn list_tracks(&self, section_key: String) -> Result<Vec<PlexTrack>, MusiqError> {
+    pub fn list_artists(&self, section_key: String) -> Result<Vec<PlexArtist>, MusiqError> {
         Ok(self
             .inner
-            .list_tracks(&section_key)?
+            .list_artists(&section_key)?
+            .into_iter()
+            .map(PlexArtist::from)
+            .collect())
+    }
+
+    pub fn list_albums(&self, artist_rating_key: String) -> Result<Vec<PlexAlbum>, MusiqError> {
+        Ok(self
+            .inner
+            .list_albums(&artist_rating_key)?
+            .into_iter()
+            .map(PlexAlbum::from)
+            .collect())
+    }
+
+    /// Lists the tracks belonging to the album `album_rating_key`.
+    pub fn list_tracks(&self, album_rating_key: String) -> Result<Vec<PlexTrack>, MusiqError> {
+        Ok(self
+            .inner
+            .list_tracks(&album_rating_key)?
             .into_iter()
             .map(PlexTrack::from)
             .collect())

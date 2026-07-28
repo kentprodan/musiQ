@@ -16,7 +16,7 @@ mod tags;
 pub use error::MusiqError;
 pub use navidrome::{NavidromeAlbum, NavidromeClient, NavidromeFolder, NavidromeSong};
 pub use player::{Player, RepeatMode};
-pub use plex::{PlexClient, PlexLibrary, PlexTrack};
+pub use plex::{PlexAlbum, PlexArtist, PlexClient, PlexLibrary, PlexTrack};
 
 use rusqlite::Connection;
 use std::path::{Path, PathBuf};

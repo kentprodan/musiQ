@@ -6,6 +6,8 @@ using MusiqWindows.ViewModels;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
 using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
 using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
+using UniffiPlexAlbum = uniffi.musiq_uniffi.PlexAlbum;
+using UniffiPlexArtist = uniffi.musiq_uniffi.PlexArtist;
 using UniffiPlexLibrary = uniffi.musiq_uniffi.PlexLibrary;
 using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 
@@ -60,6 +62,22 @@ internal sealed partial class SourcesPage : Page
         if (sender is Button { Tag: UniffiPlexLibrary library })
         {
             await ViewModel.LoadPlexLibraryAsync(library);
+        }
+    }
+
+    private async void PlexArtistButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: UniffiPlexArtist artist })
+        {
+            await ViewModel.LoadPlexArtistAsync(artist);
+        }
+    }
+
+    private async void PlexAlbumButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: UniffiPlexAlbum album })
+        {
+            await ViewModel.LoadPlexAlbumAsync(album);
         }
     }
 

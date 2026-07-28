@@ -7,6 +7,8 @@ using uniffi.musiq_uniffi;
 using UniffiNavidromeAlbum = uniffi.musiq_uniffi.NavidromeAlbum;
 using UniffiNavidromeFolder = uniffi.musiq_uniffi.NavidromeFolder;
 using UniffiNavidromeSong = uniffi.musiq_uniffi.NavidromeSong;
+using UniffiPlexAlbum = uniffi.musiq_uniffi.PlexAlbum;
+using UniffiPlexArtist = uniffi.musiq_uniffi.PlexArtist;
 using UniffiPlexLibrary = uniffi.musiq_uniffi.PlexLibrary;
 using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
 
@@ -56,6 +58,10 @@ internal partial class SourcesViewModel : ObservableObject
     private bool _isPlexConnected;
 
     public ObservableCollection<UniffiPlexLibrary> PlexLibraries { get; } = new();
+
+    public ObservableCollection<UniffiPlexArtist> PlexArtists { get; } = new();
+
+    public ObservableCollection<UniffiPlexAlbum> PlexAlbums { get; } = new();
 
     public ObservableCollection<PlexTrackDisplay> PlexTracks { get; } = new();
 
@@ -109,6 +115,8 @@ internal partial class SourcesViewModel : ObservableObject
         IsConnectingToPlex = true;
         PlexStatusMessage = "Connecting…";
         PlexLibraries.Clear();
+        PlexArtists.Clear();
+        PlexAlbums.Clear();
         PlexTracks.Clear();
 
         try
@@ -150,6 +158,8 @@ internal partial class SourcesViewModel : ObservableObject
     {
         PlexService.Instance.Disconnect();
         PlexLibraries.Clear();
+        PlexArtists.Clear();
+        PlexAlbums.Clear();
         PlexTracks.Clear();
         IsPlexConnected = false;
         PlexStatusMessage = "Not connected.";
@@ -158,9 +168,54 @@ internal partial class SourcesViewModel : ObservableObject
     public async Task LoadPlexLibraryAsync(UniffiPlexLibrary library)
     {
         PlexStatusMessage = $"Loading \"{library.Title}\"…";
+        PlexAlbums.Clear();
+        PlexTracks.Clear();
         try
         {
-            var tracks = await PlexService.Instance.ListTracksAsync(library.Key);
+            var artists = await PlexService.Instance.ListArtistsAsync(library.Key);
+
+            PlexArtists.Clear();
+            foreach (var artist in artists)
+            {
+                PlexArtists.Add(artist);
+            }
+
+            PlexStatusMessage = $"{library.Title}: {artists.Count} artist(s). Pick one to see their albums.";
+        }
+        catch (MusiqException ex)
+        {
+            PlexStatusMessage = $"Failed to load library: {ex.Message}";
+        }
+    }
+
+    public async Task LoadPlexArtistAsync(UniffiPlexArtist artist)
+    {
+        PlexStatusMessage = $"Loading \"{artist.Name}\"…";
+        PlexTracks.Clear();
+        try
+        {
+            var albums = await PlexService.Instance.ListAlbumsAsync(artist.RatingKey);
+
+            PlexAlbums.Clear();
+            foreach (var album in albums)
+            {
+                PlexAlbums.Add(album);
+            }
+
+            PlexStatusMessage = $"{artist.Name}: {albums.Count} album(s). Pick one to see its tracks.";
+        }
+        catch (MusiqException ex)
+        {
+            PlexStatusMessage = $"Failed to load artist: {ex.Message}";
+        }
+    }
+
+    public async Task LoadPlexAlbumAsync(UniffiPlexAlbum album)
+    {
+        PlexStatusMessage = $"Loading \"{album.Name}\"…";
+        try
+        {
+            var tracks = await PlexService.Instance.ListTracksAsync(album.RatingKey);
 
             PlexTracks.Clear();
             foreach (var track in tracks)
@@ -168,11 +223,11 @@ internal partial class SourcesViewModel : ObservableObject
                 PlexTracks.Add(PlexTrackDisplay.From(track));
             }
 
-            PlexStatusMessage = $"{library.Title}: {tracks.Count} track(s).";
+            PlexStatusMessage = $"{album.Name}: {tracks.Count} track(s).";
         }
         catch (MusiqException ex)
         {
-            PlexStatusMessage = $"Failed to load library: {ex.Message}";
+            PlexStatusMessage = $"Failed to load album: {ex.Message}";
         }
     }
 

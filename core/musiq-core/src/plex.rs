@@ -21,6 +21,17 @@ pub struct PlexLibrary {
     pub title: String,
 }
 
+pub struct PlexArtist {
+    pub rating_key: String,
+    pub name: String,
+}
+
+pub struct PlexAlbum {
+    pub rating_key: String,
+    pub name: String,
+    pub artist: Option<String>,
+}
+
 pub struct PlexTrack {
     pub rating_key: String,
     pub title: String,
@@ -93,17 +104,61 @@ impl PlexClient {
             .collect()
     }
 
-    /// Lists every track in the music library `section_key` (flat, no
-    /// artist/album grouping — `type=10` is Plex's numeric code for tracks).
-    pub fn list_tracks(&self, section_key: &str) -> Result<Vec<PlexTrack>, MusiqError> {
-        let path = format!("/library/sections/{section_key}/all?type=10");
+    /// Lists every artist in the music library `section_key` (`type=8` is
+    /// Plex's numeric code for artists) — the top of the browse hierarchy,
+    /// mirroring how Plex's own clients organize a music library rather than
+    /// dumping every track in the library flat.
+    pub fn list_artists(&self, section_key: &str) -> Result<Vec<PlexArtist>, MusiqError> {
+        let path = format!("/library/sections/{section_key}/all?type=8");
         let json = self.get_json(&path)?;
-        let items = json["MediaContainer"]["Metadata"]
-            .as_array()
-            .cloned()
-            .unwrap_or_default();
+        Ok(Self::items_of(&json)
+            .into_iter()
+            .filter_map(Self::parse_artist)
+            .collect())
+    }
 
-        Ok(items.into_iter().filter_map(|item| self.parse_track(&item)).collect())
+    fn parse_artist(item: Value) -> Option<PlexArtist> {
+        Some(PlexArtist {
+            rating_key: item["ratingKey"].as_str()?.to_string(),
+            name: item["title"].as_str().unwrap_or("Unknown Artist").to_string(),
+        })
+    }
+
+    /// Lists the albums belonging to `artist_rating_key`. `/children` is
+    /// Plex's generic "direct children of this item" endpoint — the same one
+    /// `list_tracks` uses to list an album's tracks.
+    pub fn list_albums(&self, artist_rating_key: &str) -> Result<Vec<PlexAlbum>, MusiqError> {
+        let path = format!("/library/metadata/{artist_rating_key}/children");
+        let json = self.get_json(&path)?;
+        Ok(Self::items_of(&json)
+            .into_iter()
+            .filter_map(Self::parse_album)
+            .collect())
+    }
+
+    fn parse_album(item: Value) -> Option<PlexAlbum> {
+        Some(PlexAlbum {
+            rating_key: item["ratingKey"].as_str()?.to_string(),
+            name: item["title"].as_str().unwrap_or("Untitled Album").to_string(),
+            // The album's own parent is its artist, so (just like a track's
+            // `parentTitle` is its album) an album's `parentTitle` is its artist.
+            artist: item["parentTitle"].as_str().map(|s| s.to_string()),
+        })
+    }
+
+    /// Lists the tracks belonging to `album_rating_key` via the same
+    /// `/children` endpoint used by `list_albums`.
+    pub fn list_tracks(&self, album_rating_key: &str) -> Result<Vec<PlexTrack>, MusiqError> {
+        let path = format!("/library/metadata/{album_rating_key}/children");
+        let json = self.get_json(&path)?;
+        Ok(Self::items_of(&json)
+            .into_iter()
+            .filter_map(|item| self.parse_track(&item))
+            .collect())
+    }
+
+    fn items_of(json: &Value) -> Vec<Value> {
+        json["MediaContainer"]["Metadata"].as_array().cloned().unwrap_or_default()
     }
 
     fn parse_track(&self, item: &Value) -> Option<PlexTrack> {
@@ -192,6 +247,23 @@ mod tests {
         let item = json!({ "ratingKey": "1", "title": "No Media" });
 
         assert!(client.parse_track(&item).is_none());
+    }
+
+    #[test]
+    fn parses_an_artist() {
+        let item = json!({ "ratingKey": "art1", "title": "AC/DC" });
+        let artist = PlexClient::parse_artist(item).unwrap();
+        assert_eq!(artist.rating_key, "art1");
+        assert_eq!(artist.name, "AC/DC");
+    }
+
+    #[test]
+    fn parses_an_album_with_its_artist_from_parent_title() {
+        let item = json!({ "ratingKey": "alb1", "title": "Back in Black", "parentTitle": "AC/DC" });
+        let album = PlexClient::parse_album(item).unwrap();
+        assert_eq!(album.rating_key, "alb1");
+        assert_eq!(album.name, "Back in Black");
+        assert_eq!(album.artist.as_deref(), Some("AC/DC"));
     }
 
     #[test]

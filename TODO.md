@@ -15,7 +15,7 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 - [x] File rename/move on disk from tag patterns (`{artist}/{album}/{title}`-style, sanitized, subfolder-creating) — full Mp3Tag-parity feature now done
 - [x] Audio playback engine (`rodio`) — single-track play/pause/resume/stop/volume
 - [x] Playback queue management (next/previous, shuffle, repeat) — auto-advance on natural track end still needs multi-track hardware verification (only tested with a 1-track library so far)
-- [x] Plex client (connect, browse music libraries, play tracks) — real streaming (HTTP range requests, no download-first step)
+- [x] Plex client (connect, browse music libraries, play tracks) — real streaming (HTTP range requests, no download-first step); browses artist → album → track (mirroring Plex's own hierarchy) instead of dumping every track in a library flat
 - [x] Navidrome/Subsonic client (connect, browse folders → albums → songs, play) — real streaming (`format=raw` + range requests)
 - [x] Shared `HttpStreamReader` (`Read`+`Seek` over HTTP ranges) so both Plex and Navidrome feed rodio's decoder directly, matching local-file playback — **neither client has been verified against a live server** (none available in this environment); only each one's error path (unreachable host, timeout) was exercised end-to-end. JSON-parsing logic has unit-test coverage against each API's documented response shape.
 - [ ] **User to verify Plex + Navidrome against real servers** (connect, browse, play, confirm streaming actually starts before full download) — untested live as of 2026-07-28, see note above

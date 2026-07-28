@@ -1,5 +1,7 @@
 using MusiqWindows.ViewModels;
 using System.Linq;
+using UniffiPlexAlbum = uniffi.musiq_uniffi.PlexAlbum;
+using UniffiPlexArtist = uniffi.musiq_uniffi.PlexArtist;
 using UniffiPlexClient = uniffi.musiq_uniffi.PlexClient;
 using UniffiPlexLibrary = uniffi.musiq_uniffi.PlexLibrary;
 using UniffiPlexTrack = uniffi.musiq_uniffi.PlexTrack;
@@ -11,13 +13,15 @@ namespace MusiqWindows.Services;
 /// and token are remembered in <see cref="CredentialStore"/> across app
 /// restarts, but this service itself only ever holds the live connection.
 ///
-/// Playback is real streaming: each track's <c>StreamUrl</c> is handed
-/// straight to <see cref="LibraryService"/>'s shared <c>Player</c>, which
-/// fetches it on demand via HTTP range requests rather than downloading the
-/// whole file first. Playing a track loads the whole currently-shown list as
-/// a queue (Rust's <c>Player::set_queue</c> takes plain path/URL strings, so
-/// a queue of stream URLs works exactly like a queue of local files) so
-/// Next/Previous/shuffle/repeat work across a Plex library, not just one track.
+/// Browsing mirrors Plex's own artist -&gt; album -&gt; track hierarchy (not a
+/// flat dump of every track in a library, which doesn't scale past a small
+/// collection). Playback is real streaming: each track's <c>StreamUrl</c> is
+/// handed straight to <see cref="LibraryService"/>'s shared <c>Player</c>,
+/// which fetches it on demand via HTTP range requests rather than
+/// downloading the whole file first. Playing a track loads the whole
+/// currently-shown album as a queue (Rust's <c>Player::set_queue</c> takes
+/// plain path/URL strings, so a queue of stream URLs works exactly like a
+/// queue of local files) so Next/Previous/shuffle/repeat work across an album.
 /// </summary>
 internal sealed class PlexService
 {
@@ -52,12 +56,19 @@ internal sealed class PlexService
     public Task<IReadOnlyList<UniffiPlexLibrary>> ListMusicLibrariesAsync() =>
         Task.Run(() => (IReadOnlyList<UniffiPlexLibrary>)RequireClient().ListMusicLibraries());
 
-    public Task<IReadOnlyList<UniffiPlexTrack>> ListTracksAsync(string sectionKey) =>
-        Task.Run(() => (IReadOnlyList<UniffiPlexTrack>)RequireClient().ListTracks(sectionKey));
+    public Task<IReadOnlyList<UniffiPlexArtist>> ListArtistsAsync(string sectionKey) =>
+        Task.Run(() => (IReadOnlyList<UniffiPlexArtist>)RequireClient().ListArtists(sectionKey));
+
+    public Task<IReadOnlyList<UniffiPlexAlbum>> ListAlbumsAsync(string artistRatingKey) =>
+        Task.Run(() => (IReadOnlyList<UniffiPlexAlbum>)RequireClient().ListAlbums(artistRatingKey));
+
+    /// Lists the tracks in the album `albumRatingKey`.
+    public Task<IReadOnlyList<UniffiPlexTrack>> ListTracksAsync(string albumRatingKey) =>
+        Task.Run(() => (IReadOnlyList<UniffiPlexTrack>)RequireClient().ListTracks(albumRatingKey));
 
     /// Plays `track`, queuing the rest of `queueTracks` (the currently-shown
-    /// library listing, in its displayed order) around it so Next/Previous
-    /// work across the whole library.
+    /// album's track listing, in its displayed order) around it so
+    /// Next/Previous work across the whole album.
     public Task PlayTrackAsync(UniffiPlexTrack track, IReadOnlyList<UniffiPlexTrack> queueTracks)
     {
         var items = queueTracks.Select(t => TrackItem.FromPlex(t, t.StreamUrl)).ToList();
