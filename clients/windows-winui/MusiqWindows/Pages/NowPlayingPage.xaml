@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:MusiqWindows.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodels="using:MusiqWindows.ViewModels"
     mc:Ignorable="d">
 
     <Grid Padding="24,16,24,16" RowSpacing="24">
@@ -19,6 +20,22 @@
             <StackPanel Spacing="4">
                 <TextBlock Text="{x:Bind ViewModel.TrackTitle, Mode=OneWay}" Style="{StaticResource SubtitleTextBlockStyle}" />
                 <TextBlock Text="{x:Bind ViewModel.TrackArtist, Mode=OneWay}" Opacity="0.7" />
+            </StackPanel>
+
+            <StackPanel Spacing="4" MaxWidth="480" HorizontalAlignment="Left">
+                <Slider
+                    x:Name="PositionSlider"
+                    Width="480"
+                    Minimum="0"
+                    Maximum="{x:Bind ViewModel.DurationSecs, Mode=OneWay}"
+                    IsEnabled="{x:Bind ViewModel.CanSeek, Mode=OneWay}"
+                    PointerPressed="PositionSlider_PointerPressed"
+                    PointerCaptureLost="PositionSlider_PointerCaptureLost" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="PositionText" Text="0:00" Opacity="0.7" FontSize="12" />
+                    <TextBlock Text=" / " Opacity="0.7" FontSize="12" />
+                    <TextBlock Text="{x:Bind ViewModel.DurationText, Mode=OneWay}" Opacity="0.7" FontSize="12" />
+                </StackPanel>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Spacing="8">
@@ -64,6 +81,32 @@
                     HorizontalContentAlignment="Center">
                     <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="{x:Bind ViewModel.RepeatGlyph, Mode=OneWay}" FontSize="14" />
                 </Button>
+            </StackPanel>
+
+            <StackPanel Spacing="8" MaxWidth="480" HorizontalAlignment="Left">
+                <TextBlock Text="Up next" Style="{StaticResource SubtitleTextBlockStyle}" FontSize="16" />
+                <ListView ItemsSource="{x:Bind ViewModel.UpNext}" SelectionMode="None" Height="280">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:QueueItemDisplay">
+                            <Grid Padding="8,6" ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    Grid.Column="0"
+                                    FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                    Glyph="&#xE768;"
+                                    FontSize="10"
+                                    Visibility="{x:Bind IsCurrent}" />
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{x:Bind Track.Title}" Opacity="{x:Bind TitleOpacity}" />
+                                    <TextBlock Text="{x:Bind Track.Artist}" Opacity="0.7" FontSize="11" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </StackPanel>
         </StackPanel>
     </Grid>

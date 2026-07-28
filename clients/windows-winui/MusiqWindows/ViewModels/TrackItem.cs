@@ -18,6 +18,9 @@ namespace MusiqWindows.ViewModels;
 /// placeholder fallbacks baked in ("Unknown Artist" etc) — the tag-edit
 /// dialogs must pre-fill from <c>RawTitle</c>/<c>RawArtist</c>/<c>RawAlbum</c>
 /// instead, or they'd write those placeholders into the file as real tags.
+///
+/// <c>DurationSecs</c> is the numeric duration (for the Now Playing seek
+/// bar's range) alongside <c>Duration</c>, the pre-formatted "m:ss" string.
 /// </summary>
 public sealed record TrackItem(
     string Id,
@@ -25,6 +28,7 @@ public sealed record TrackItem(
     string Artist,
     string Album,
     string Duration,
+    uint? DurationSecs,
     string Path,
     string? RawTitle,
     string? RawArtist,
@@ -42,6 +46,7 @@ public sealed record TrackItem(
             Artist: track.Artist ?? "Unknown Artist",
             Album: track.Album ?? "Unknown Album",
             Duration: FormatDuration(track.DurationSecs),
+            DurationSecs: track.DurationSecs,
             Path: track.Path,
             RawTitle: track.Title,
             RawArtist: track.Artist,
@@ -56,6 +61,7 @@ public sealed record TrackItem(
             Artist: track.Artist ?? "Unknown Artist",
             Album: track.Album ?? "Unknown Album",
             Duration: FormatDuration(track.DurationSecs),
+            DurationSecs: track.DurationSecs,
             Path: streamUrl,
             RawTitle: track.Title,
             RawArtist: track.Artist,
@@ -70,6 +76,7 @@ public sealed record TrackItem(
             Artist: song.Artist ?? "Unknown Artist",
             Album: song.Album ?? "Unknown Album",
             Duration: FormatDuration(song.DurationSecs),
+            DurationSecs: song.DurationSecs,
             Path: song.StreamUrl,
             RawTitle: song.Title,
             RawArtist: song.Artist,

@@ -254,6 +254,20 @@ impl Player {
     pub fn queue_len(&self) -> u32 {
         self.inner.lock().unwrap().queue_len()
     }
+
+    pub fn position_secs(&self) -> f64 {
+        self.inner.lock().unwrap().position_secs()
+    }
+
+    pub fn seek_to_secs(&self, secs: f64) -> Result<(), MusiqError> {
+        Ok(self.inner.lock().unwrap().seek_to_secs(secs)?)
+    }
+
+    /// The queue's current play order (reflects shuffle), as indices into
+    /// the original track list — lets the UI show an "up next" list.
+    pub fn queue_order(&self) -> Vec<u32> {
+        self.inner.lock().unwrap().queue_order()
+    }
 }
 
 #[derive(uniffi::Record)]

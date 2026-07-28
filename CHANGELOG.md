@@ -7,6 +7,18 @@ All notable changes to musiQ are documented in this file.
 ### Added
 - `TODO.md` tracking remaining work across the whole project (core, native clients, Windows shell polish).
 
+## 2026-07-28 — Now Playing: seek bar and up-next queue list
+
+### Added
+- **`core/musiq-core::Player`**: `position_secs` (rodio's `get_pos`), `seek_to_secs` (`try_seek`, works for both local files and streamed Plex/Navidrome sources since `HttpStreamReader` implements `Seek`), and `queue_order` (the queue's current play order — reflects shuffle — as indices into the original track list, for an accurate "up next" view).
+- **`ffi/musiq-uniffi`**: mirrors all three, regenerated into the C# bindings.
+- **WinUI3 Now Playing page**: a real seek bar (`Slider`, per Microsoft's guidance that media seek bars are an explicitly-endorsed slider use case) with drag-to-seek — tracks whether the user is actively dragging via `PointerPressed`/`PointerCaptureLost` so a 500ms position-poll timer doesn't fight the drag — plus a live elapsed/duration readout ("1:45 / 3:04"). Below that, an "up next" list showing the queue in its actual (shuffle-aware) play order with the current track highlighted.
+- `TrackItem` gained a numeric `DurationSecs` (alongside the existing pre-formatted `Duration` string) so the seek bar has a real `Maximum`.
+- Verified end-to-end on the Windows desktop: elapsed time updates live, dragging the slider actually repositions playback (confirmed position continues counting up from the seeked point, not the pre-seek one), and the up-next list shows the current queue.
+
+### Fixed
+- The Play/Pause and Repeat glyphs on the Now Playing page rendered blank after a `NowPlayingViewModel.cs` rewrite silently dropped the embedded Segoe Fluent Icons glyph characters — a recurring hazard with raw private-use-area Unicode characters in source, now written as explicit C# backslash-u escapes instead of literal characters. Also fixed the seek bar itself rendering at its default ~20px width instead of filling its container, because a shrink-to-fit `StackPanel` doesn't stretch children that have no explicit `Width`.
+
 ## 2026-07-28 — Real streaming for Plex, plus a Navidrome client
 
 ### Added

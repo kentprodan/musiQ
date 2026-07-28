@@ -126,6 +126,9 @@ internal sealed class LibraryService
     {
         var next = !await Task.Run(() => _player.IsShuffled());
         await Task.Run(() => _player.SetShuffle(next));
+        // Shuffling rebuilds the play order, so anything showing "up next"
+        // needs to know, even though the current track itself didn't change.
+        CurrentTrackChanged?.Invoke();
     }
 
     public Task<bool> IsShuffledAsync() =>
@@ -136,6 +139,23 @@ internal sealed class LibraryService
 
     public Task<RepeatMode> GetRepeatModeAsync() =>
         Task.Run(() => _player.RepeatMode());
+
+    public Task<double> GetPositionSecondsAsync() =>
+        Task.Run(() => _player.PositionSecs());
+
+    public Task SeekAsync(double seconds) =>
+        Task.Run(() => _player.SeekToSecs(seconds));
+
+    /// The queue in its current play order (reflects shuffle), for an "up
+    /// next" list — `CurrentTrack` is somewhere in this list, not excluded.
+    public async Task<IReadOnlyList<TrackItem>> GetQueueInPlayOrderAsync()
+    {
+        var order = await Task.Run(() => _player.QueueOrder());
+        return order
+            .Where(i => i < _queueTracks.Count)
+            .Select(i => _queueTracks[(int)i])
+            .ToList();
+    }
 
     private void RefreshCurrentTrackFromQueue()
     {

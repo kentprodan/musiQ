@@ -7,6 +7,7 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::sync::Mutex;
+use std::time::Duration;
 
 use rand::seq::SliceRandom;
 use rodio::{Decoder, DeviceSinkBuilder, MixerDeviceSink, Player as RodioPlayer};
@@ -282,5 +283,32 @@ impl Player {
 
     pub fn queue_len(&self) -> u32 {
         self.queue.lock().unwrap().tracks.len() as u32
+    }
+
+    /// Elapsed playback position of the current track, in seconds.
+    pub fn position_secs(&self) -> f64 {
+        self.inner.get_pos().as_secs_f64()
+    }
+
+    /// Seeks within the current track. Errors if the source doesn't support
+    /// seeking (streamed sources support it via `HttpStreamReader`, same as
+    /// local files).
+    pub fn seek_to_secs(&self, secs: f64) -> Result<(), MusiqError> {
+        self.inner
+            .try_seek(Duration::from_secs_f64(secs.max(0.0)))
+            .map_err(|e| MusiqError::Playback(e.to_string()))
+    }
+
+    /// The queue's current play order, as indices into the original
+    /// (unshuffled) track list passed to `set_queue` — lets the UI show an
+    /// "up next" list that reflects shuffle.
+    pub fn queue_order(&self) -> Vec<u32> {
+        self.queue
+            .lock()
+            .unwrap()
+            .play_order
+            .iter()
+            .map(|&i| i as u32)
+            .collect()
     }
 }

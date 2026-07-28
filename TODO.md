@@ -36,11 +36,12 @@ Tracks remaining work across the whole project. See [`docs/architecture.md`](doc
 
 - [x] Now Playing page: real transport controls (Play/Pause/Stop, current track title+artist) wired to the rodio playback engine
 - [x] Now Playing page: Shuffle/Previous/Next/Repeat controls wired to the queue engine
-- [ ] Now Playing: "up next" queue list view (queue exists in the core/FFI layer, no visual list yet)
-- [ ] Now Playing: seek bar / elapsed-time display (rodio's `get_pos` is available, not wired up yet)
+- [x] Now Playing: "up next" queue list view, current track highlighted, shuffle-aware (reads the queue's actual play order, not just the original list)
+- [x] Now Playing: seek bar / elapsed-time display — real drag-to-seek (`rodio::Player::try_seek`), not just read-only progress
 - [x] Sources page: Plex connection (server URL + token, library list, track list with Play)
 - [x] Sources page: Navidrome connection (server URL + username/password, folder → album → song browsing, Play)
 - [ ] Title bar: interactive content (e.g. search box) needs `InputNonClientPointerSource` passthrough regions
 - [ ] Revisit `[ObservableProperty]` field-vs-partial-property pattern (CommunityToolkit.Mvvm 8.4 partial-property codegen didn't work in this toolchain combo — currently on the field-based pattern, which works but triggers an AOT/WinRT-marshalling advisory warning)
 - [x] Tag editing UI: per-track edit dialog + multi-select ("Extended" selection) batch-edit dialog
 - [ ] Library page: sorting/filtering, album art
+- [ ] Now Playing: click a track in "up next" to jump straight to it (currently display-only — no direct-jump Player method exists yet, only relative next/previous)
